@@ -246,22 +246,30 @@ def process_files(input_folder, processed_folder, error_folder, conn, processed_
         
         processed_files.add(filename)
         
-        if filename.endswith('.json'):
-            success = process_contract_file(filepath, conn, 'finance', 'contracts')
-            if success:
-                shutil.move(filepath, os.path.join(processed_folder, filename))
-                logging.info(f"Processed and moved {filename} to processed")
-            else:
+        try:
+            if filename.endswith('.json'):
+                success = process_contract_file(filepath, conn, 'finance', 'contracts')
+                if success:
+                    shutil.move(filepath, os.path.join(processed_folder, filename))
+                    logging.info(f"Processed and moved {filename} to processed")
+                else:
+                    shutil.move(filepath, os.path.join(error_folder, filename))
+                    logging.error(f"Moved {filename} to errors")
+            elif filename.endswith('.csv'):
+                success = process_ohlcv_file(filepath, conn, 'finance')
+                if success:
+                    shutil.move(filepath, os.path.join(processed_folder, filename))
+                    logging.info(f"Processed and moved {filename} to processed")
+                else:
+                    shutil.move(filepath, os.path.join(error_folder, filename))
+                    logging.error(f"Moved {filename} to errors")
+        except Exception as e:
+            logging.error(f"Unexpected error processing {filename}: {e}")
+            # Move to errors if not already
+            try:
                 shutil.move(filepath, os.path.join(error_folder, filename))
-                logging.error(f"Moved {filename} to errors")
-        elif filename.endswith('.csv'):
-            success = process_ohlcv_file(filepath, conn, 'finance')
-            if success:
-                shutil.move(filepath, os.path.join(processed_folder, filename))
-                logging.info(f"Processed and moved {filename} to processed")
-            else:
-                shutil.move(filepath, os.path.join(error_folder, filename))
-                logging.error(f"Moved {filename} to errors")
+            except:
+                pass
 
 def main():
     with open('config.json', 'r') as f:
