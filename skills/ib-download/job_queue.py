@@ -1,10 +1,21 @@
 import sqlite3
 import json
 import uuid
+import os
 from datetime import datetime
 
 class JobQueue:
-    def __init__(self, db_path=r'C:\Users\clawuser\.openclaw\shared\services\ib_download_service\jobs.db'):
+    def __init__(self, db_path=None):
+        if db_path is None:
+            # Try to load from config.json in current dir
+            config_path = os.path.join(os.path.dirname(__file__), 'config.json')
+            if os.path.exists(config_path):
+                with open(config_path, 'r') as f:
+                    config = json.load(f)
+                db_path = config.get('db_path', 'jobs.db')
+            else:
+                db_path = r'C:\Users\clawuser\.openclaw\shared\services\ib_download_service\jobs.db'
+        self.db_path = db_path
         self.db_path = db_path
         self._init_db()
 
