@@ -202,13 +202,15 @@ def process_ohlcv_file(filepath, conn, schema):
         df['symbol'] = symbol
         
         # Rename columns
-        rename_map = {v: k for k, v in col_map.items()}
+        rename_map = {v: k for k, v in col_map.items() if k != 'time'}
+        rename_map[col_map['time']] = time_col_name
         if 'adj_close' in rename_map:
             rename_map['adjusted_close'] = 'adj_close'
         df = df.rename(columns=rename_map)
         
-        # Select columns
-        insert_cols = ['conid', 'symbol', 'time', 'open', 'high', 'low', 'close'] + [k for k in optional if k in df.columns]
+        # Select columns, map time to correct column
+        time_col_name = 'day' if table == 'ohlcv_1d' else 'time_1m'
+        insert_cols = ['conid', 'symbol', time_col_name, 'open', 'high', 'low', 'close'] + [k for k in optional if k in df.columns]
         df = df[insert_cols]
         
         # Convert time to timestamp
@@ -217,7 +219,7 @@ def process_ohlcv_file(filepath, conn, schema):
         # Batch insert with conflict handling
         batch_size = 1000
         quoted_cols = [f'"{col}"' for col in insert_cols]
-        conflict_cols = ['conid', 'time']  # Assuming primary key
+        conflict_cols = ['conid', time_col_name]
         query = f"INSERT INTO {schema}.{table} ({', '.join(quoted_cols)}) VALUES %s ON CONFLICT ({', '.join(conflict_cols)}) DO NOTHING"
         
         with conn.cursor() as cur:
