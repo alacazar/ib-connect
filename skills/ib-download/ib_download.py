@@ -23,9 +23,7 @@ def submit_single_job(queue, args):
         'port': args.port,
         'client_id': args.client_id,
         'timeout': args.timeout,
-        'readonly': args.readonly,
         'max_retries': args.max_retries,
-        'chunk_duration': args.chunk_duration,
         'use_rth': args.use_rth,
         'format': args.format,
         'agent': args.agent
@@ -48,9 +46,7 @@ def submit_batch_jobs(queue, args):
                 'port': args.port,
                 'client_id': args.client_id,
                 'timeout': args.timeout,
-                'readonly': args.readonly,
                 'max_retries': args.max_retries,
-                'chunk_duration': args.chunk_duration,
                 'use_rth': args.use_rth,
                 'format': args.format,
                 'agent': args.agent
@@ -77,9 +73,7 @@ def main():
     parser.add_argument('-p', '--port', type=int, default=7497, help='IB port')
     parser.add_argument('-i', '--client-id', type=int, default=1, help='Client ID')
     parser.add_argument('--timeout', type=float, default=4.0, help='Timeout')
-    parser.add_argument('--readonly', action='store_true', default=True, help='Read-only')
     parser.add_argument('--max-retries', type=int, default=3, help='Max retries')
-    parser.add_argument('--chunk-duration', default='7 D', help='Chunk duration')
     parser.add_argument('--use-rth', action='store_true', help='Use RTH')
     parser.add_argument('--format', default='csv', choices=['csv', 'json'], help='Output format')
     parser.add_argument('-A', '--agent', help='Agent name/ID for notifications')

@@ -82,12 +82,15 @@ def download_data(ib, conid, start, end, bar_size, show, output_dir, max_retries
 
 def process_job(job_key, params):
     try:
+        chunk_days = get_chunk_days(params['bar_size'])
+        chunk_duration = f"{chunk_days} D"
+        
         with IBConnection.connect(
             host=params['host'],
             port=params['port'],
             clientId=params['client_id'],
             timeout=params['timeout'],
-            readonly=params['readonly']
+            readonly=True
         ) as ib:
             result_path = download_data(
                 ib,
@@ -98,7 +101,7 @@ def process_job(job_key, params):
                 params['show'],
                 params['output_dir'],
                 params['max_retries'],
-                params['chunk_duration'],
+                chunk_duration,
                 params['use_rth'],
                 verbose=False  # Can add verbose to params
             )
