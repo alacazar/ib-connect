@@ -197,3 +197,25 @@
 2026-02-25 17:27:29 - INFO - Notification sent for job 46645800-94c3-450b-b969-cabbbe9e3f4a, response: 400
 2026-02-25 17:27:29 - INFO - Job 46645800-94c3-450b-b969-cabbbe9e3f4a completed with status: failed
 2026-02-25 17:27:29 - ERROR - Job 46645800-94c3-450b-b969-cabbbe9e3f4a error: '<' not supported between instances of 'datetime.date' and 'datetime.datetime'
+2026-02-25 17:29:13 - INFO - Download service started
+2026-02-25 17:29:18 - INFO - Processing job 0c05fd99-bbe8-43b2-aa9a-4afbbf82622e for conid 265598
+2026-02-25 17:29:18 - INFO - Connecting to 127.0.0.1:7497 with clientId 5...
+2026-02-25 17:29:18 - INFO - Connected
+2026-02-25 17:29:18 - INFO - Logged on to server version 176
+2026-02-25 17:29:18 - INFO - Warning 2104, reqId -1: Market data farm connection is OK:usfarm.nj
+2026-02-25 17:29:18 - INFO - Warning 2104, reqId -1: Market data farm connection is OK:usfuture
+2026-02-25 17:29:18 - INFO - Warning 2104, reqId -1: Market data farm connection is OK:usopt.nj
+2026-02-25 17:29:18 - INFO - Warning 2104, reqId -1: Market data farm connection is OK:cashfarm
+2026-02-25 17:29:18 - INFO - Warning 2104, reqId -1: Market data farm connection is OK:usfarm
+2026-02-25 17:29:18 - INFO - Warning 2106, reqId -1: HMDS data farm connection is OK:euhmds
+2026-02-25 17:29:18 - INFO - Warning 2106, reqId -1: HMDS data farm connection is OK:fundfarm
+2026-02-25 17:29:18 - INFO - Warning 2106, reqId -1: HMDS data farm connection is OK:ushmds
+2026-02-25 17:29:18 - INFO - Warning 2158, reqId -1: Sec-def data farm connection is OK:secdefil
+2026-02-25 17:29:18 - INFO - API connection ready
+2026-02-25 17:29:18 - INFO - Synchronization complete
+2026-02-25 17:29:19 - INFO - Download params: conid=265598, start=2023-01-01, end=2023-12-31 00:00:00-05:00, bar_size='1 day', show=TRADES, duration=365 D
+2026-02-25 17:29:40 - INFO - Disconnecting from 127.0.0.1:7497, 244 B sent in 8 messages, 42.5 kB received in 401 messages, session time 21.4 s.
+2026-02-25 17:29:40 - INFO - Disconnecting
+2026-02-25 17:29:40 - INFO - Notification sent for job 0c05fd99-bbe8-43b2-aa9a-4afbbf82622e, response: 400
+2026-02-25 17:29:40 - INFO - Job 0c05fd99-bbe8-43b2-aa9a-4afbbf82622e completed with status: failed
+2026-02-25 17:29:40 - ERROR - Job 0c05fd99-bbe8-43b2-aa9a-4afbbf82622e error: can't compare offset-naive and offset-aware datetimes

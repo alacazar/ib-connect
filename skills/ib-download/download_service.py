@@ -68,12 +68,13 @@ def download_data(ib, conid, start, end, bar_size, show, output_dir, max_retries
                     all_bars.extend(bars)
                     if verbose:
                         print(f"  + {len(bars)} bars (to {bars[0].date})")
-                    # bars[0].date is datetime, but to be safe
+                    # bars[0].date is naive datetime in exchange tz, localize to eastern
                     if isinstance(bars[0].date, datetime):
-                        end_dt = bars[0].date - timedelta(seconds=1)
+                        end_dt = eastern.localize(bars[0].date) - timedelta(seconds=1)
                     else:
-                        # If date, combine with time
-                        end_dt = datetime.combine(bars[0].date, datetime.min.time()) - timedelta(seconds=1)
+                        # If date, combine with time and localize
+                        dt = datetime.combine(bars[0].date, datetime.min.time())
+                        end_dt = eastern.localize(dt) - timedelta(seconds=1)
                     time.sleep(20)  # Pacing
                     break
                 else:
