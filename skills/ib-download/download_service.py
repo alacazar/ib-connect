@@ -39,6 +39,14 @@ def get_chunk_days(bar_size):
     return 7  # Default
 
 def download_data(ib, conid, start, end, bar_size, show, output_dir, max_retries=3, chunk_duration='7 D', use_rth=False, verbose=False):
+    # Format bar_size to IB's required format
+    bar_size_formatted = (bar_size.replace('min', ' min')
+                          .replace('hour', ' hour')
+                          .replace('day', ' day')
+                          .replace('sec', ' sec')
+                          .replace('week', 'W')
+                          .replace('month', 'M'))
+    
     contract = Contract(conId=conid)
     ib.qualifyContracts(contract)
     
@@ -56,7 +64,7 @@ def download_data(ib, conid, start, end, bar_size, show, output_dir, max_retries
                     contract,
                     endDateTime=end_dt,
                     durationStr=duration_str,
-                    barSizeSetting=bar_size,
+                    barSizeSetting=bar_size_formatted,
                     whatToShow=show,
                     useRTH=use_rth,
                     formatDate=1,
@@ -85,7 +93,7 @@ def download_data(ib, conid, start, end, bar_size, show, output_dir, max_retries
         df = util.df(all_bars)
         df = df.sort_values('date').drop_duplicates()
         os.makedirs(output_dir, exist_ok=True)
-        filename = f"{conid}_{bar_size.replace(' ', '')}.csv"
+        filename = f"{conid}_{bar_size}.csv"
         filepath = os.path.join(output_dir, filename)
         df.to_csv(filepath, index=False)
         return filepath
