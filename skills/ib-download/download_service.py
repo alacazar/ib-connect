@@ -10,6 +10,7 @@ import json
 import os
 import sys
 import re
+import logging
 from datetime import datetime, timedelta
 import pytz
 from ib_insync import IB, Contract, util
@@ -152,22 +153,38 @@ def process_job(job_key, params):
                 # If token in config, add headers
                 if 'token' in config:
                     headers["Authorization"] = f"Bearer {config['token']}"
-                requests.post(webhook_url, json=payload, headers=headers)
+                response = requests.post(webhook_url, json=payload, headers=headers)
+                logging.info(f"Notification sent for job {job_key}, response: {response.status_code}")
         except Exception as notify_e:
-            # Log but don't fail job
-            pass
+            logging.error(f"Notification failed for job {job_key}: {notify_e}")
     
     return status, result_path, error_msg
 
 def main():
+    logging.basicConfig(
+        filename=os.path.join(os.path.dirname(__file__), 'download_service.log'),
+        level=logging.INFO,
+        format='%(asctime)s - %(levelname)s - %(message)s',
+        datefmt='%Y-%m-%d %H:%M:%S'
+    )
+    logging.info("Download service started")
+    
     queue = JobQueue()
     while True:
-        job = queue.get_pending_job()
-        if job:
-            job_key, params = job
-            status, result_path, error_msg = process_job(job_key, params)
-            queue.update_status(job_key, status, result_path, error_msg)
-        time.sleep(5)  # Poll interval
+        try:
+            job = queue.get_pending_job()
+            if job:
+                job_key, params = job
+                logging.info(f"Processing job {job_key} for conid {params['conid']}")
+                status, result_path, error_msg = process_job(job_key, params)
+                logging.info(f"Job {job_key} completed with status: {status}")
+                if error_msg:
+                    logging.error(f"Job {job_key} error: {error_msg}")
+                queue.update_status(job_key, status, result_path, error_msg)
+            time.sleep(5)  # Poll interval
+        except Exception as e:
+            logging.error(f"Service error: {e}")
+            time.sleep(10)  # Longer sleep on error
 
 if __name__ == '__main__':
     main()
