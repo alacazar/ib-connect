@@ -126,8 +126,20 @@ def process_job(job_key, params):
                     'result_path': result_path,
                     'error': error_msg
                 }
-                payload = {"message": json.dumps(message)}
-                requests.post(webhook_url, json=payload)
+                instruction = f"Download job {job_key} {status}. Result path: {result_path or 'N/A'}. Error: {error_msg or 'None'}. Proceed with next steps."
+                payload = {
+                    "message": instruction,
+                    "agentId": params['agent'],
+                    "name": "DownloadComplete",
+                    "sessionKey": f"hook:download:{job_key}",
+                    "thinking": "low",
+                    "deliver": True
+                }
+                headers = {}
+                # If token in config, add headers
+                if 'token' in config:
+                    headers["Authorization"] = f"Bearer {config['token']}"
+                requests.post(webhook_url, json=payload, headers=headers)
         except Exception as notify_e:
             # Log but don't fail job
             pass
