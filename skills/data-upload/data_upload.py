@@ -151,7 +151,9 @@ def process_ohlcv_file(filepath, conn, schema):
         
         # Read CSV
         df = pd.read_csv(filepath, sep=sep)
-        logging.info(f"Columns in CSV: {df.columns.tolist()}")
+        logging.info(f"Raw columns in CSV: {list(df.columns)}")
+        df.columns = df.columns.str.lower()
+        logging.info(f"Lowercase columns: {df.columns.tolist()}")
         logging.info(f"Number of rows: {len(df)}")
         if df.empty:
             logging.error(f"Empty CSV: {filename}")
