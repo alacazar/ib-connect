@@ -22,38 +22,73 @@ CONTRACT_KEYS = {
 }
 
 def compute_conid(symbol, exchange, currency, sec_type):
-    """Compute uint64 hash as conid for non-IB contracts."""
+    """Compute hash as conid for non-IB contracts (fits in signed BIGINT)."""
     key = f"{symbol}{exchange}{currency}{sec_type}".encode('utf-8')
     hash_obj = hashlib.sha256(key)
-    # Take first 8 bytes as uint64
-    return int.from_bytes(hash_obj.digest()[:8], byteorder='big', signed=False)
+    # Take first 7 bytes (56 bits) to fit in signed BIGINT
+    return int.from_bytes(hash_obj.digest()[:7], byteorder='big', signed=False)
+
+# Required contract schema keys
+REQUIRED_KEYS = {'symbol', 'exchange', 'currency', 'sec_type', 'min_tick', 'tick_value', 'multiplier', 'time_zone_id'}
 
 def validate_contract(data):
     """Validate contract JSON against schema."""
     if not isinstance(data, dict):
         return False
-    # Check if all keys are present (allowing extras)
-    if not CONTRACT_KEYS.issubset(data.keys()):
-        missing = CONTRACT_KEYS - set(data.keys())
-        logging.error(f"Missing keys: {missing}")
+    # Check required keys are present
+    if not REQUIRED_KEYS.issubset(data.keys()):
+        missing = REQUIRED_KEYS - set(data.keys())
+        logging.error(f"Missing required keys: {missing}")
         return False
-    # Basic type checks (can expand)
-    if not isinstance(data['conid'], (int, type(None))):
+    # Check no invalid keys
+    invalid = set(data.keys()) - CONTRACT_KEYS
+    if invalid:
+        logging.error(f"Invalid keys: {invalid}")
+        return False
+    # Basic type checks
+    if 'conid' in data and not isinstance(data['conid'], (int, type(None))):
         logging.error("conid must be int or None")
+        return False
+    if not isinstance(data['min_tick'], (int, float)):
+        logging.error("min_tick must be number")
+        return False
+    if not isinstance(data['tick_value'], (int, float)):
+        logging.error("tick_value must be number")
+        return False
+    if not isinstance(data['multiplier'], (int, float)):
+        logging.error("multiplier must be number")
         return False
     return True
 
 def process_contract_file(filepath, conn, schema, table):
-    """Process a contract JSON file."""
+    """Process a contract JSON file (single object or array)."""
     try:
         with open(filepath, 'r') as f:
             data = json.load(f)
         
+        if isinstance(data, list):
+            # Array of contracts
+            success = True
+            for item in data:
+                if not process_single_contract(item, conn, schema, table):
+                    success = False
+            return success
+        else:
+            # Single contract
+            return process_single_contract(data, conn, schema, table)
+    except Exception as e:
+        logging.error(f"Error processing {filepath}: {e}")
+        return False
+
+def process_single_contract(data, conn, schema, table):
+    """Process a single contract dict."""
+    try:
         if not validate_contract(data):
+            logging.error(f"Validation failed for {data.get('symbol', 'unknown')}")
             return False
         
         # Compute conid if missing
-        if data['conid'] is None:
+        if 'conid' not in data or data['conid'] is None:
             data['conid'] = compute_conid(data['symbol'], data['exchange'], data['currency'], data['sec_type'])
         
         # Insert to DB
@@ -61,13 +96,15 @@ def process_contract_file(filepath, conn, schema, table):
             columns = list(data.keys())
             values = [data[k] for k in columns]
             placeholders = ', '.join(['%s'] * len(columns))
-            query = f"INSERT INTO {schema}.{table} ({', '.join(columns)}) VALUES ({placeholders}) ON CONFLICT (conid) DO NOTHING"
+            quoted_columns = [f'"{col}"' for col in columns]
+            query = f"INSERT INTO {schema}.{table} ({', '.join(quoted_columns)}) VALUES ({placeholders}) ON CONFLICT (conid) DO NOTHING"
+            logging.debug(f"Executing query: {query} with values: {values}")
             cur.execute(query, values)
         conn.commit()
-        logging.info(f"Inserted contract {data['conid']}")
+        logging.info(f"Inserted contract {json.dumps(data)}")
         return True
     except Exception as e:
-        logging.error(f"Error processing {filepath}: {e}")
+        logging.error(f"Error inserting contract {data.get('symbol', 'unknown')}: {e}")
         return False
 
 def process_files(input_folder, processed_folder, error_folder, conn, processed_files):
@@ -94,6 +131,18 @@ def process_files(input_folder, processed_folder, error_folder, conn, processed_
                 logging.error(f"Moved {filename} to errors")
 
 def main():
+    with open('config.json', 'r') as f:
+        config = json.load(f)
+    
+    input_folder = config['input_folder']
+    processed_folder = config['processed_folder']
+    error_folder = config['error_folder']
+    db_uri = os.environ.get('PG_URI', os.path.expandvars(config.get('db_uri', '')))
+    
+    if not db_uri:
+        print("No DB URI provided")
+        return
+    
     logging.basicConfig(
         filename='data_upload.log',
         level=logging.INFO,
@@ -101,19 +150,12 @@ def main():
         datefmt='%Y-%m-%d %H:%M:%S'
     )
     
-    with open('config.json', 'r') as f:
-        config = json.load(f)
-    
-    input_folder = config['input_folder']
-    processed_folder = config['processed_folder']
-    error_folder = config['error_folder']
-    db_uri = os.environ.get('PG_URI', config.get('db_uri', ''))
-    
-    if not db_uri:
-        logging.error("No DB URI provided")
+    try:
+        conn = psycopg2.connect(db_uri)
+        logging.info("Connected to DB")
+    except Exception as e:
+        logging.error(f"DB connection failed: {e}")
         return
-    
-    conn = psycopg2.connect(db_uri)
     
     processed_files = set()
     
