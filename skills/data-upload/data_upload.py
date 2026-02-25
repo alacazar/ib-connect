@@ -127,9 +127,11 @@ def process_ohlcv_file(filepath, conn, schema):
             return False
         
         # Map barsize
+        time_col_name = 'day'  # default
         if barsize_file == '1min':
             table = 'ohlcv_1m'
             expected_barsize = '1min'
+            time_col_name = 'time_1m'
         elif barsize_file == '1day':
             table = 'ohlcv_1d'
             expected_barsize = '1day'
@@ -213,7 +215,6 @@ def process_ohlcv_file(filepath, conn, schema):
         df = df.rename(columns=rename_map)
         
         # Select columns, map time to correct column
-        time_col_name = 'day' if table == 'ohlcv_1d' else 'time_1m'
         insert_cols = ['conid', 'symbol', time_col_name, 'open', 'high', 'low', 'close'] + [k for k in optional if k in df.columns]
         logging.info(f"Insert columns: {insert_cols}")
         df = df[insert_cols]
