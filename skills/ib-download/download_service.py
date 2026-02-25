@@ -92,7 +92,7 @@ def download_data(ib, conid, start, end, bar_size, show, output_dir, max_retries
     
     if all_bars:
         df = util.df(all_bars)
-        df = df.sort_values('date').drop_duplicates()
+        df = df.rename(columns={'barCount': 'trades'}).sort_values('date').drop_duplicates()
         os.makedirs(output_dir, exist_ok=True)
         filename = f"{conid}_{bar_size}.csv"
         filepath = os.path.join(output_dir, filename)
