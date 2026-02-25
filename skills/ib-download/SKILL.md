@@ -64,10 +64,10 @@ Returns the current status (pending, processing, completed, failed) and result d
 ### Examples
 ```bash
 # Single contract, 1-min bars
-python ib_download.py -c 265598 -s 2023-01-01 -e 2023-12-31 -b 1min -A apoc
+python ib_download.py -c 265598 -s 2023-01-01 -e 2023-12-31 -b "1 min" -A apoc
 
 # Daily bars for speed
-python ib_download.py -c 265598 -s 2020-01-01 -e 2023-12-31 -b 1day -A apoc
+python ib_download.py -c 265598 -s 2020-01-01 -e 2023-12-31 -b "1 day" -A apoc
 
 # Batch from file
 python ib_download.py -f contracts.csv -A apoc
