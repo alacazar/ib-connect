@@ -20,7 +20,7 @@ Config in `config.json`: input/processed/error folders.
 
 ### Processing
 - **Contracts (.json)**: Validate schema, compute conid if missing (uint64 hash), insert to `finance.contracts`.
-- **OHLCV (.csv)**: [Future] Validate and insert to hypertable.
+- **OHLCV (.csv)**: Filename `<symbol>.<conid>.<barsize>.csv` (barsize: 1min/1day). Parse header (case-insensitive), validate mandatory fields (time, open, high, low, close), deduce bar size, insert to `finance.ohlcv_1m` or `finance.ohlcv_1d` in batches.
 - Files moved to processed/ or errors/ after handling.
 
 ### Notes

@@ -11,6 +11,7 @@ import logging
 import hashlib
 import shutil
 import time
+import pandas as pd
 import psycopg2
 from psycopg2.extras import execute_values
 
@@ -107,6 +108,128 @@ def process_single_contract(data, conn, schema, table):
         logging.error(f"Error inserting contract {data.get('symbol', 'unknown')}: {e}")
         return False
 
+def process_ohlcv_file(filepath, conn, schema):
+    """Process an OHLCV CSV file."""
+    try:
+        # Extract from filename: <symbol>.<conid>.<barsize>.csv
+        filename = os.path.basename(filepath)
+        if not filename.endswith('.csv'):
+            return False
+        parts = filename[:-4].split('.')
+        if len(parts) != 3:
+            logging.error(f"Invalid filename format: {filename}")
+            return False
+        symbol, conid_str, barsize_file = parts
+        try:
+            conid = int(conid_str)
+        except ValueError:
+            logging.error(f"Invalid conid in filename: {conid_str}")
+            return False
+        
+        # Map barsize
+        if barsize_file == '1min':
+            table = 'ohlcv_1m'
+            expected_barsize = '1min'
+        elif barsize_file == '1day':
+            table = 'ohlcv_1d'
+            expected_barsize = '1day'
+        else:
+            logging.error(f"Unsupported barsize in filename: {barsize_file}")
+            return False
+        
+        # Detect separator
+        with open(filepath, 'r') as f:
+            sample = f.read(1024)
+            if '\t' in sample and sample.count('\t') > sample.count(','):
+                sep = '\t'
+            else:
+                sep = ','
+        
+        # Read CSV
+        df = pd.read_csv(filepath, sep=sep)
+        if df.empty:
+            logging.error(f"Empty CSV: {filename}")
+            return False
+        
+        # Map columns case-insensitively
+        df.columns = df.columns.str.lower()
+        col_map = {}
+        time_cols = ['date', 'datetime', 'time', 'timestamp']
+        for col in time_cols:
+            if col in df.columns:
+                col_map['time'] = col
+                break
+        else:
+            logging.error(f"No time column found in {filename}")
+            return False
+        
+        mandatory = ['open', 'high', 'low', 'close']
+        for col in mandatory:
+            if col not in df.columns:
+                logging.error(f"Missing mandatory column {col} in {filename}")
+                return False
+            col_map[col] = col
+        
+        optional = ['volume', 'trades', 'adjusted_close', 'adj_close']
+        for col in optional:
+            if col in df.columns:
+                col_map[col] = col
+            elif col == 'adj_close' and 'adjusted_close' in df.columns:
+                col_map['adjusted_close'] = 'adjusted_close'
+        
+        # Deduce bar size from data
+        time_col = col_map['time']
+        if len(df) < 2:
+            deduced_barsize = expected_barsize  # Assume
+        else:
+            times = pd.to_datetime(df[time_col].head(10))
+            diffs = times.diff().dropna()
+            avg_diff = diffs.mean()
+            if avg_diff < pd.Timedelta('2 min'):
+                deduced_barsize = '1min'
+            elif avg_diff >= pd.Timedelta('1 day'):
+                deduced_barsize = '1day'
+            else:
+                logging.error(f"Could not deduce bar size from time diffs in {filename}")
+                return False
+        
+        if deduced_barsize != expected_barsize:
+            logging.error(f"Barsize mismatch: file={expected_barsize}, deduced={deduced_barsize} in {filename}")
+            return False
+        
+        # Prepare data
+        df['conid'] = conid
+        df['symbol'] = symbol
+        
+        # Rename columns
+        rename_map = {v: k for k, v in col_map.items()}
+        if 'adj_close' in rename_map:
+            rename_map['adjusted_close'] = 'adj_close'
+        df = df.rename(columns=rename_map)
+        
+        # Select columns
+        insert_cols = ['conid', 'symbol', 'time', 'open', 'high', 'low', 'close'] + [k for k in optional if k in df.columns]
+        df = df[insert_cols]
+        
+        # Convert time to timestamp
+        df['time'] = pd.to_datetime(df['time'])
+        
+        # Batch insert
+        batch_size = 1000
+        with conn.cursor() as cur:
+            for i in range(0, len(df), batch_size):
+                batch = df.iloc[i:i+batch_size]
+                values = [tuple(row) for row in batch.values]
+                placeholders = ', '.join(['%s'] * len(insert_cols))
+                query = f"INSERT INTO {schema}.{table} ({', '.join(insert_cols)}) VALUES ({placeholders})"
+                execute_values(cur, query, values)
+        conn.commit()
+        logging.info(f"Inserted {len(df)} OHLCV bars for {symbol} into {table}")
+        return True
+    except Exception as e:
+        logging.error(f"Error processing OHLCV file {filepath}: {e}")
+        return False
+
 def process_files(input_folder, processed_folder, error_folder, conn, processed_files):
     """Poll for new files and process them."""
     os.makedirs(processed_folder, exist_ok=True)
@@ -123,6 +246,14 @@ def process_files(input_folder, processed_folder, error_folder, conn, processed_
         
         if filename.endswith('.json'):
             success = process_contract_file(filepath, conn, 'finance', 'contracts')
+            if success:
+                shutil.move(filepath, os.path.join(processed_folder, filename))
+                logging.info(f"Processed and moved {filename} to processed")
+            else:
+                shutil.move(filepath, os.path.join(error_folder, filename))
+                logging.error(f"Moved {filename} to errors")
+        elif filename.endswith('.csv'):
+            success = process_ohlcv_file(filepath, conn, 'finance')
             if success:
                 shutil.move(filepath, os.path.join(processed_folder, filename))
                 logging.info(f"Processed and moved {filename} to processed")
