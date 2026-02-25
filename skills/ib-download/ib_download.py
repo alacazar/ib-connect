@@ -28,8 +28,7 @@ def submit_single_job(queue, args):
         'chunk_duration': args.chunk_duration,
         'use_rth': args.use_rth,
         'format': args.format,
-        'callback_session': args.callback_session,
-        'webhook_url': args.webhook_url
+        'agent': args.agent
     }
     job_key = queue.submit_job(params)
     print(json.dumps({'job_key': job_key}))
@@ -54,8 +53,7 @@ def submit_batch_jobs(queue, args):
                 'chunk_duration': args.chunk_duration,
                 'use_rth': args.use_rth,
                 'format': args.format,
-                'callback_session': args.callback_session,
-                'webhook_url': args.webhook_url
+                'agent': args.agent
             }
             job_key = queue.submit_job(params)
             print(json.dumps({'job_key': job_key}))
@@ -84,8 +82,7 @@ def main():
     parser.add_argument('--chunk-duration', default='7 D', help='Chunk duration')
     parser.add_argument('--use-rth', action='store_true', help='Use RTH')
     parser.add_argument('--format', default='csv', choices=['csv', 'json'], help='Output format')
-    parser.add_argument('-S', '--callback-session', help='Session key for notifications')
-    parser.add_argument('-W', '--webhook-url', help='Webhook URL for notifications')
+    parser.add_argument('-A', '--agent', help='Agent name/ID for notifications')
     parser.add_argument('-v', '--verbose', action='store_true', help='Verbose')
 
     args = parser.parse_args()

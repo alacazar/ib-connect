@@ -109,18 +109,24 @@ def process_job(job_key, params):
     except Exception as e:
         status, result_path, error_msg = 'failed', None, str(e)
     
-    # Notify via webhook if provided
-    if params.get('webhook_url'):
+    # Notify via webhook if agent specified
+    if params.get('agent'):
         try:
             import requests
-            message = {
-                'event': 'download_complete',
-                'job_key': job_key,
-                'status': status,
-                'result_path': result_path,
-                'error': error_msg
-            }
-            requests.post(params['webhook_url'], json=message)
+            import json
+            with open(os.path.join(os.path.dirname(__file__), 'config.json'), 'r') as f:
+                config = json.load(f)
+            webhook_url = config.get('webhook_url')
+            if webhook_url:
+                message = {
+                    'event': 'download_complete',
+                    'job_key': job_key,
+                    'agent': params['agent'],
+                    'status': status,
+                    'result_path': result_path,
+                    'error': error_msg
+                }
+                requests.post(webhook_url, json=message)
         except Exception as notify_e:
             # Log but don't fail job
             pass
