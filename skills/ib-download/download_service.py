@@ -48,6 +48,7 @@ def download_data(ib, conid, start, end, bar_size, show, output_dir, max_retries
                           .replace('month', 'M'))
     
     contract = Contract(conId=conid)
+    contract.includeExpired = False
     ib.qualifyContracts(contract)
     
     eastern = pytz.timezone('US/Eastern')

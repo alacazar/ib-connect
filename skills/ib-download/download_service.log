@@ -20,3 +20,68 @@
 2026-02-25 16:48:35 - ERROR - Notification failed for job c899c0d3-007a-4ab9-a8ae-7c8b6a8b63a8: HTTPConnectionPool(host='localhost', port=8080): Max retries exceeded with url: /hooks/agent (Caused by NewConnectionError("HTTPConnection(host='localhost', port=8080): Failed to establish a new connection: [WinError 10061] No connection could be made because the target machine actively refused it"))
 2026-02-25 16:48:35 - INFO - Job c899c0d3-007a-4ab9-a8ae-7c8b6a8b63a8 completed with status: completed
 2026-02-25 16:48:35 - ERROR - Job c899c0d3-007a-4ab9-a8ae-7c8b6a8b63a8 error: No data found
+2026-02-25 16:51:09 - INFO - Download service started
+2026-02-25 16:51:14 - INFO - Processing job 6a01dfdb-8b34-41dd-b73a-a79b0dc42309 for conid 265598
+2026-02-25 16:51:14 - INFO - Connecting to 127.0.0.1:7497 with clientId 5...
+2026-02-25 16:51:14 - INFO - Connected
+2026-02-25 16:51:14 - INFO - Logged on to server version 176
+2026-02-25 16:51:14 - INFO - Warning 2104, reqId -1: Market data farm connection is OK:usfarm.nj
+2026-02-25 16:51:14 - INFO - Warning 2104, reqId -1: Market data farm connection is OK:usfuture
+2026-02-25 16:51:14 - INFO - Warning 2104, reqId -1: Market data farm connection is OK:usopt.nj
+2026-02-25 16:51:14 - INFO - Warning 2104, reqId -1: Market data farm connection is OK:cashfarm
+2026-02-25 16:51:14 - INFO - Warning 2104, reqId -1: Market data farm connection is OK:usfarm
+2026-02-25 16:51:14 - INFO - Warning 2106, reqId -1: HMDS data farm connection is OK:euhmds
+2026-02-25 16:51:14 - INFO - Warning 2106, reqId -1: HMDS data farm connection is OK:fundfarm
+2026-02-25 16:51:14 - INFO - Warning 2106, reqId -1: HMDS data farm connection is OK:ushmds
+2026-02-25 16:51:14 - INFO - Warning 2158, reqId -1: Sec-def data farm connection is OK:secdefil
+2026-02-25 16:51:14 - INFO - API connection ready
+2026-02-25 16:51:14 - INFO - Synchronization complete
+2026-02-25 16:51:35 - INFO - Disconnecting from 127.0.0.1:7497, 244 B sent in 8 messages, 42.5 kB received in 401 messages, session time 21.3 s.
+2026-02-25 16:51:35 - INFO - Disconnecting
+2026-02-25 16:51:40 - ERROR - Notification failed for job 6a01dfdb-8b34-41dd-b73a-a79b0dc42309: HTTPConnectionPool(host='localhost', port=8080): Max retries exceeded with url: /hooks/agent (Caused by NewConnectionError("HTTPConnection(host='localhost', port=8080): Failed to establish a new connection: [WinError 10061] No connection could be made because the target machine actively refused it"))
+2026-02-25 16:51:40 - INFO - Job 6a01dfdb-8b34-41dd-b73a-a79b0dc42309 completed with status: failed
+2026-02-25 16:51:40 - ERROR - Job 6a01dfdb-8b34-41dd-b73a-a79b0dc42309 error: '<' not supported between instances of 'datetime.date' and 'datetime.datetime'
+2026-02-25 16:58:52 - INFO - Download service started
+2026-02-25 16:58:57 - INFO - Processing job b31f7ff1-2136-4f78-95c5-58a028303725 for conid 265598
+2026-02-25 16:58:57 - INFO - Connecting to 127.0.0.1:7497 with clientId 5...
+2026-02-25 16:58:57 - INFO - Connected
+2026-02-25 16:58:57 - INFO - Logged on to server version 176
+2026-02-25 16:58:57 - INFO - Warning 2104, reqId -1: Market data farm connection is OK:usfarm.nj
+2026-02-25 16:58:57 - INFO - Warning 2104, reqId -1: Market data farm connection is OK:usfuture
+2026-02-25 16:58:57 - INFO - Warning 2104, reqId -1: Market data farm connection is OK:usopt.nj
+2026-02-25 16:58:57 - INFO - Warning 2104, reqId -1: Market data farm connection is OK:cashfarm
+2026-02-25 16:58:57 - INFO - Warning 2104, reqId -1: Market data farm connection is OK:usfarm
+2026-02-25 16:58:57 - INFO - Warning 2106, reqId -1: HMDS data farm connection is OK:euhmds
+2026-02-25 16:58:57 - INFO - Warning 2106, reqId -1: HMDS data farm connection is OK:fundfarm
+2026-02-25 16:58:57 - INFO - Warning 2106, reqId -1: HMDS data farm connection is OK:ushmds
+2026-02-25 16:58:57 - INFO - Warning 2158, reqId -1: Sec-def data farm connection is OK:secdefil
+2026-02-25 16:58:57 - INFO - API connection ready
+2026-02-25 16:58:57 - INFO - Synchronization complete
+2026-02-25 16:58:57 - ERROR - Error 321, reqId 4: Error validating request.-'bL' : cause - Historical data bar size setting is invalid. Legal ones are: 1 secs, 5 secs, 10 secs, 15 secs, 30 secs, 1 min, 2 mins, 3 mins, 4 mins, 5 mins, 10 mins, 15 mins, 20 mins, 30 mins, 1 hour, 2 hours, 3 hours, 4 hours, 8 hours, 1 day, 1W, 1M, contract: Contract(secType='STK', conId=265598, symbol='AAPL', exchange='SMART', primaryExchange='NASDAQ', currency='USD', localSymbol='AAPL', tradingClass='NMS')
+2026-02-25 16:58:57 - INFO - Disconnecting from 127.0.0.1:7497, 245 B sent in 8 messages, 20.5 kB received in 401 messages, session time 277 ms.
+2026-02-25 16:58:57 - INFO - Disconnecting
+2026-02-25 16:59:01 - ERROR - Notification failed for job b31f7ff1-2136-4f78-95c5-58a028303725: HTTPConnectionPool(host='localhost', port=8080): Max retries exceeded with url: /hooks/agent (Caused by NewConnectionError("HTTPConnection(host='localhost', port=8080): Failed to establish a new connection: [WinError 10061] No connection could be made because the target machine actively refused it"))
+2026-02-25 16:59:01 - INFO - Job b31f7ff1-2136-4f78-95c5-58a028303725 completed with status: completed
+2026-02-25 16:59:01 - ERROR - Job b31f7ff1-2136-4f78-95c5-58a028303725 error: No data found
+2026-02-25 17:01:34 - INFO - Download service started
+2026-02-25 17:01:39 - INFO - Processing job 927bf543-5147-4ddd-83b6-2697f618fccb for conid 265598
+2026-02-25 17:01:39 - INFO - Connecting to 127.0.0.1:7497 with clientId 5...
+2026-02-25 17:01:39 - INFO - Connected
+2026-02-25 17:01:39 - INFO - Logged on to server version 176
+2026-02-25 17:01:39 - INFO - Warning 2104, reqId -1: Market data farm connection is OK:usfarm.nj
+2026-02-25 17:01:39 - INFO - Warning 2104, reqId -1: Market data farm connection is OK:usfuture
+2026-02-25 17:01:39 - INFO - Warning 2104, reqId -1: Market data farm connection is OK:usopt.nj
+2026-02-25 17:01:39 - INFO - Warning 2104, reqId -1: Market data farm connection is OK:cashfarm
+2026-02-25 17:01:39 - INFO - Warning 2104, reqId -1: Market data farm connection is OK:usfarm
+2026-02-25 17:01:39 - INFO - Warning 2106, reqId -1: HMDS data farm connection is OK:euhmds
+2026-02-25 17:01:39 - INFO - Warning 2106, reqId -1: HMDS data farm connection is OK:fundfarm
+2026-02-25 17:01:39 - INFO - Warning 2106, reqId -1: HMDS data farm connection is OK:ushmds
+2026-02-25 17:01:39 - INFO - Warning 2158, reqId -1: Sec-def data farm connection is OK:secdefil
+2026-02-25 17:01:39 - INFO - API connection ready
+2026-02-25 17:01:39 - INFO - Synchronization complete
+2026-02-25 17:01:39 - ERROR - Error 321, reqId 4: Error validating request.-'bL' : cause - Historical data bar size setting is invalid. Legal ones are: 1 secs, 5 secs, 10 secs, 15 secs, 30 secs, 1 min, 2 mins, 3 mins, 4 mins, 5 mins, 10 mins, 15 mins, 20 mins, 30 mins, 1 hour, 2 hours, 3 hours, 4 hours, 8 hours, 1 day, 1W, 1M, contract: Contract(secType='STK', conId=265598, symbol='AAPL', exchange='SMART', primaryExchange='NASDAQ', currency='USD', localSymbol='AAPL', tradingClass='NMS')
+2026-02-25 17:01:39 - INFO - Disconnecting from 127.0.0.1:7497, 245 B sent in 8 messages, 20.5 kB received in 401 messages, session time 377 ms.
+2026-02-25 17:01:39 - INFO - Disconnecting
+2026-02-25 17:01:40 - INFO - Notification sent for job 927bf543-5147-4ddd-83b6-2697f618fccb, response: 400
+2026-02-25 17:01:40 - INFO - Job 927bf543-5147-4ddd-83b6-2697f618fccb completed with status: completed
+2026-02-25 17:01:40 - ERROR - Job 927bf543-5147-4ddd-83b6-2697f618fccb error: No data found
