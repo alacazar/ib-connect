@@ -45,7 +45,8 @@ def download_data(ib, conid, start, end, bar_size, show, output_dir, max_retries
     ib.qualifyContracts(contract)
     
     eastern = pytz.timezone('US/Eastern')
-    end_dt = eastern.localize(datetime.strptime(end, '%Y-%m-%d'))
+    end_dt = eastern.localize(datetime.strptime(end, '%Y-%m-%d').replace(hour=16, minute=15))
+    start_dt = eastern.localize(datetime.strptime(start, '%Y-%m-%d'))
 
     logging.info(f"Download params: conid={conid}, start={start}, end={end_dt}, bar_size='{bar_size}', show={show}, duration={chunk_duration}")
    
@@ -86,7 +87,7 @@ def download_data(ib, conid, start, end, bar_size, show, output_dir, max_retries
                 time.sleep(30)
                 if attempt == max_retries - 1:
                     raise e
-        if not end_dt or end_dt < eastern.localize(datetime.strptime(start, '%Y-%m-%d')):
+        if not end_dt or end_dt < start_dt:
             break
     
     if all_bars:
