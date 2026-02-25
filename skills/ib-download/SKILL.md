@@ -61,7 +61,7 @@ Returns the current status (pending, processing, completed, failed) and result d
 - **Processing**: Downloads data in chunks (respecting IB limits), saves as CSV in `output_dir` (e.g., `265598_1min.csv`).
 - **Notification**: On completion/failure, notifies the specified agent with details, including any custom message.
 - **Errors**: Check status for issues (e.g., connection failed, no data).
-- **Agent Instructions**: When receiving a completion notification, summarize and execute the next steps based on the custom message (e.g., "Load data and analyze trends"). This helps agents remember tasks for asynchronous workflows.
+- **Agent Instructions**: When posting a download job, summarize what should be done when receiving completion notification (e.g., "Load data and analyze trends"). This helps agents remember tasks for asynchronous workflows.
 
 ### Examples
 ```bash

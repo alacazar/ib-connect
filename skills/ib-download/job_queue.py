@@ -4,7 +4,7 @@ import uuid
 from datetime import datetime
 
 class JobQueue:
-    def __init__(self, db_path='jobs.db'):
+    def __init__(self, db_path=r'C:\Users\clawuser\.openclaw\shared\services\ib_download_service\jobs.db'):
         self.db_path = db_path
         self._init_db()
 
