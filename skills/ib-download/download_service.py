@@ -39,15 +39,6 @@ def get_chunk_days(bar_size):
     return 7  # Default
 
 def download_data(ib, conid, start, end, bar_size, show, output_dir, max_retries=3, chunk_duration='7 D', use_rth=False, verbose=False):
-    # Format bar_size to IB's required format
-    bar_size_formatted = (bar_size.replace('min', ' min')
-                          .replace('hour', ' hour')
-                          .replace('day', ' day')
-                          .replace('sec', ' sec')
-                          .replace('week', ' W')
-                          .replace('month', ' M'))
-    
-    logging.info(f"Download params: conid={conid}, start={start}, end={end}, bar_size='{bar_size}' -> '{bar_size_formatted}', show={show}, duration={chunk_duration}")
     
     contract = Contract(conId=conid)
     contract.includeExpired = False
@@ -55,19 +46,19 @@ def download_data(ib, conid, start, end, bar_size, show, output_dir, max_retries
     
     eastern = pytz.timezone('US/Eastern')
     end_dt = eastern.localize(datetime.strptime(end, '%Y-%m-%d'))
-    
+
+    logging.info(f"Download params: conid={conid}, start={start}, end={end_dt}, bar_size='{bar_size}', show={show}, duration={chunk_duration}")
+   
     all_bars = []
-    chunk_days = get_chunk_days(bar_size)
-    duration_str = f'{chunk_days} D'
-    
+     
     while True:
         for attempt in range(max_retries):
             try:
                 bars = ib.reqHistoricalData(
                     contract,
                     endDateTime=end_dt,
-                    durationStr=duration_str,
-                    barSizeSetting=bar_size_formatted,
+                    durationStr=chunk_duration,
+                    barSizeSetting=bar_size,
                     whatToShow=show,
                     useRTH=use_rth,
                     formatDate=1,
@@ -77,7 +68,12 @@ def download_data(ib, conid, start, end, bar_size, show, output_dir, max_retries
                     all_bars.extend(bars)
                     if verbose:
                         print(f"  + {len(bars)} bars (to {bars[0].date})")
-                    end_dt = bars[0].date - timedelta(seconds=1)
+                    # bars[0].date is datetime, but to be safe
+                    if isinstance(bars[0].date, datetime):
+                        end_dt = bars[0].date - timedelta(seconds=1)
+                    else:
+                        # If date, combine with time
+                        end_dt = datetime.combine(bars[0].date, datetime.min.time()) - timedelta(seconds=1)
                     time.sleep(20)  # Pacing
                     break
                 else:

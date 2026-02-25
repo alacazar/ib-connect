@@ -130,3 +130,70 @@
 2026-02-25 17:06:30 - INFO - Notification sent for job dc063453-a507-45d2-b80d-15c3c8bddfb7, response: 400
 2026-02-25 17:06:30 - INFO - Job dc063453-a507-45d2-b80d-15c3c8bddfb7 completed with status: completed
 2026-02-25 17:06:30 - ERROR - Job dc063453-a507-45d2-b80d-15c3c8bddfb7 error: No data found
+2026-02-25 17:12:53 - INFO - Download service started
+2026-02-25 17:12:58 - INFO - Processing job eb07ce0b-8d41-4824-b471-48bd45af4799 for conid 265598
+2026-02-25 17:12:58 - INFO - Connecting to 127.0.0.1:7497 with clientId 5...
+2026-02-25 17:12:58 - INFO - Connected
+2026-02-25 17:12:58 - INFO - Logged on to server version 176
+2026-02-25 17:12:58 - INFO - Warning 2104, reqId -1: Market data farm connection is OK:usfarm.nj
+2026-02-25 17:12:58 - INFO - Warning 2104, reqId -1: Market data farm connection is OK:usfuture
+2026-02-25 17:12:58 - INFO - Warning 2104, reqId -1: Market data farm connection is OK:usopt.nj
+2026-02-25 17:12:58 - INFO - Warning 2104, reqId -1: Market data farm connection is OK:cashfarm
+2026-02-25 17:12:58 - INFO - Warning 2104, reqId -1: Market data farm connection is OK:usfarm
+2026-02-25 17:12:58 - INFO - Warning 2106, reqId -1: HMDS data farm connection is OK:euhmds
+2026-02-25 17:12:58 - INFO - Warning 2106, reqId -1: HMDS data farm connection is OK:fundfarm
+2026-02-25 17:12:58 - INFO - Warning 2106, reqId -1: HMDS data farm connection is OK:ushmds
+2026-02-25 17:12:58 - INFO - Warning 2158, reqId -1: Sec-def data farm connection is OK:secdefil
+2026-02-25 17:12:58 - INFO - API connection ready
+2026-02-25 17:12:58 - INFO - Synchronization complete
+2026-02-25 17:12:58 - INFO - Download params: conid=265598, start=2023-01-01, end=2023-12-31, bar_size='1 day' -> '1  day', show=TRADES, duration=365 D
+2026-02-25 17:12:58 - ERROR - Error 321, reqId 4: Error validating request.-'bL' : cause - Historical data bar size setting is invalid. Legal ones are: 1 secs, 5 secs, 10 secs, 15 secs, 30 secs, 1 min, 2 mins, 3 mins, 4 mins, 5 mins, 10 mins, 15 mins, 20 mins, 30 mins, 1 hour, 2 hours, 3 hours, 4 hours, 8 hours, 1 day, 1W, 1M, contract: Contract(secType='STK', conId=265598, symbol='AAPL', exchange='SMART', primaryExchange='NASDAQ', currency='USD', localSymbol='AAPL', tradingClass='NMS')
+2026-02-25 17:12:58 - INFO - Disconnecting from 127.0.0.1:7497, 245 B sent in 8 messages, 20.5 kB received in 401 messages, session time 399 ms.
+2026-02-25 17:12:58 - INFO - Disconnecting
+2026-02-25 17:12:59 - INFO - Notification sent for job eb07ce0b-8d41-4824-b471-48bd45af4799, response: 400
+2026-02-25 17:12:59 - INFO - Job eb07ce0b-8d41-4824-b471-48bd45af4799 completed with status: completed
+2026-02-25 17:12:59 - ERROR - Job eb07ce0b-8d41-4824-b471-48bd45af4799 error: No data found
+2026-02-25 17:19:20 - INFO - Download service started
+2026-02-25 17:19:25 - INFO - Processing job b9c2842e-4da7-4d82-9697-967d9fdcfbca for conid 265598
+2026-02-25 17:19:25 - INFO - Connecting to 127.0.0.1:7497 with clientId 5...
+2026-02-25 17:19:25 - INFO - Connected
+2026-02-25 17:19:25 - INFO - Logged on to server version 176
+2026-02-25 17:19:25 - INFO - Warning 2104, reqId -1: Market data farm connection is OK:usfarm.nj
+2026-02-25 17:19:25 - INFO - Warning 2104, reqId -1: Market data farm connection is OK:usfuture
+2026-02-25 17:19:25 - INFO - Warning 2104, reqId -1: Market data farm connection is OK:usopt.nj
+2026-02-25 17:19:25 - INFO - Warning 2104, reqId -1: Market data farm connection is OK:cashfarm
+2026-02-25 17:19:25 - INFO - Warning 2104, reqId -1: Market data farm connection is OK:usfarm
+2026-02-25 17:19:25 - INFO - Warning 2106, reqId -1: HMDS data farm connection is OK:euhmds
+2026-02-25 17:19:25 - INFO - Warning 2106, reqId -1: HMDS data farm connection is OK:fundfarm
+2026-02-25 17:19:25 - INFO - Warning 2106, reqId -1: HMDS data farm connection is OK:ushmds
+2026-02-25 17:19:25 - INFO - Warning 2158, reqId -1: Sec-def data farm connection is OK:secdefil
+2026-02-25 17:19:25 - INFO - API connection ready
+2026-02-25 17:19:25 - INFO - Synchronization complete
+2026-02-25 17:19:25 - INFO - Disconnecting from 127.0.0.1:7497, 136 B sent in 7 messages, 20.2 kB received in 400 messages, session time 260 ms.
+2026-02-25 17:19:25 - INFO - Disconnecting
+2026-02-25 17:19:26 - INFO - Notification sent for job b9c2842e-4da7-4d82-9697-967d9fdcfbca, response: 400
+2026-02-25 17:19:26 - INFO - Job b9c2842e-4da7-4d82-9697-967d9fdcfbca completed with status: failed
+2026-02-25 17:19:26 - ERROR - Job b9c2842e-4da7-4d82-9697-967d9fdcfbca error: name 'bar_size_formatted' is not defined
+2026-02-25 17:20:50 - INFO - Download service started
+2026-02-25 17:24:02 - INFO - Download service started
+2026-02-25 17:27:07 - INFO - Processing job 46645800-94c3-450b-b969-cabbbe9e3f4a for conid 265598
+2026-02-25 17:27:07 - INFO - Connecting to 127.0.0.1:7497 with clientId 5...
+2026-02-25 17:27:07 - INFO - Connected
+2026-02-25 17:27:07 - INFO - Logged on to server version 176
+2026-02-25 17:27:07 - INFO - Warning 2104, reqId -1: Market data farm connection is OK:usfarm.nj
+2026-02-25 17:27:07 - INFO - Warning 2104, reqId -1: Market data farm connection is OK:usfuture
+2026-02-25 17:27:07 - INFO - Warning 2104, reqId -1: Market data farm connection is OK:usopt.nj
+2026-02-25 17:27:07 - INFO - Warning 2104, reqId -1: Market data farm connection is OK:cashfarm
+2026-02-25 17:27:07 - INFO - Warning 2104, reqId -1: Market data farm connection is OK:usfarm
+2026-02-25 17:27:07 - INFO - Warning 2106, reqId -1: HMDS data farm connection is OK:euhmds
+2026-02-25 17:27:07 - INFO - Warning 2106, reqId -1: HMDS data farm connection is OK:fundfarm
+2026-02-25 17:27:07 - INFO - Warning 2106, reqId -1: HMDS data farm connection is OK:ushmds
+2026-02-25 17:27:07 - INFO - Warning 2158, reqId -1: Sec-def data farm connection is OK:secdefil
+2026-02-25 17:27:07 - INFO - API connection ready
+2026-02-25 17:27:07 - INFO - Synchronization complete
+2026-02-25 17:27:07 - INFO - Download params: conid=265598, start=2023-01-01, end=2023-12-31 00:00:00-05:00, bar_size='1 day', show=TRADES, duration=365 D
+2026-02-25 17:27:28 - INFO - Disconnecting from 127.0.0.1:7497, 244 B sent in 8 messages, 42.5 kB received in 401 messages, session time 21.0 s.
+2026-02-25 17:27:28 - INFO - Disconnecting
+2026-02-25 17:27:29 - INFO - Notification sent for job 46645800-94c3-450b-b969-cabbbe9e3f4a, response: 400
+2026-02-25 17:27:29 - INFO - Job 46645800-94c3-450b-b969-cabbbe9e3f4a completed with status: failed
+2026-02-25 17:27:29 - ERROR - Job 46645800-94c3-450b-b969-cabbbe9e3f4a error: '<' not supported between instances of 'datetime.date' and 'datetime.datetime'
