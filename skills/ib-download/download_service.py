@@ -154,15 +154,6 @@ def main():
             job_key, params = job
             status, result_path, error_msg = process_job(job_key, params)
             queue.update_status(job_key, status, result_path, error_msg)
-            if params.get('callback_session'):
-                message = {
-                    'event': 'download_complete',
-                    'job_key': job_key,
-                    'status': status,
-                    'result_path': result_path,
-                    'error': error_msg
-                }
-                sessions_send(session_key=params['callback_session'], message=json.dumps(message))
         time.sleep(5)  # Poll interval
 
 if __name__ == '__main__':
