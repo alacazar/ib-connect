@@ -9,6 +9,7 @@ import argparse
 import json
 import sys
 import csv
+from datetime import datetime
 from job_queue import JobQueue
 
 def submit_single_job(queue, args):
@@ -65,7 +66,7 @@ def main():
     parser.add_argument('-c', '--conid', type=int, help='Contract ID')
     parser.add_argument('-s', '--start', help='Start date (YYYY-MM-DD)')
     parser.add_argument('-e', '--end', help='End date (YYYY-MM-DD)')
-    parser.add_argument('-b', '--bar-size', help='Bar size (e.g., 1min)')
+    parser.add_argument('-b', '--bar-size', choices=['1 secs', '5 secs', '10 secs', '15 secs', '30 secs', '1 min', '2 mins', '3 mins', '4 mins', '5 mins', '10 mins', '15 mins', '20 mins', '30 mins', '1 hour', '2 hours', '3 hours', '4 hours', '8 hours', '1 day', '1W', '1M'], help='Bar size')
     parser.add_argument('--show', default='TRADES', help='What to show')
     parser.add_argument('-o', '--output-dir', default='./data', help='Output directory')
     parser.add_argument('-f', '--config-file', help='Config file for batch')
@@ -80,6 +81,19 @@ def main():
     parser.add_argument('-v', '--verbose', action='store_true', help='Verbose')
 
     args = parser.parse_args()
+
+    # Validate dates
+    try:
+        datetime.strptime(args.start, '%Y-%m-%d')
+        datetime.strptime(args.end, '%Y-%m-%d')
+    except ValueError:
+        print("Error: Dates must be in YYYY-MM-DD format", file=sys.stderr)
+        sys.exit(1)
+
+    # Validate conid if provided
+    if hasattr(args, 'conid') and args.conid is not None and args.conid <= 0:
+        print("Error: conid must be a positive integer", file=sys.stderr)
+        sys.exit(1)
 
     queue = JobQueue()
 
