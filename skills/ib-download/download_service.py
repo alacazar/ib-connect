@@ -8,13 +8,16 @@ Background service to process download jobs.
 import time
 import json
 import os
+import sys
 import re
 from datetime import datetime, timedelta
 import pytz
 from ib_insync import IB, Contract, util
-from shared.ib_connection import IBConnection
 from queue import JobQueue
-from sessions_send import sessions_send  # Assuming available
+
+# Add shared to path
+sys.path.append(os.path.join(os.path.dirname(__file__), '../..'))
+from shared.ib_connection import IBConnection
 
 def get_chunk_days(bar_size):
     # Parse bar_size, e.g., '1min' -> 1, '5mins' -> 5
@@ -100,11 +103,29 @@ def process_job(job_key, params):
                 verbose=False  # Can add verbose to params
             )
             if result_path:
-                return 'completed', result_path, None
+                status, result_path, error_msg = 'completed', result_path, None
             else:
-                return 'completed', None, 'No data found'
+                status, result_path, error_msg = 'completed', None, 'No data found'
     except Exception as e:
-        return 'failed', None, str(e)
+        status, result_path, error_msg = 'failed', None, str(e)
+    
+    # Notify via webhook if provided
+    if params.get('webhook_url'):
+        try:
+            import requests
+            message = {
+                'event': 'download_complete',
+                'job_key': job_key,
+                'status': status,
+                'result_path': result_path,
+                'error': error_msg
+            }
+            requests.post(params['webhook_url'], json=message)
+        except Exception as notify_e:
+            # Log but don't fail job
+            pass
+    
+    return status, result_path, error_msg
 
 def main():
     queue = JobQueue()
