@@ -214,14 +214,17 @@ def process_ohlcv_file(filepath, conn, schema):
         # Convert time to timestamp
         df['time'] = pd.to_datetime(df['time'])
         
-        # Batch insert
+        # Batch insert with conflict handling
         batch_size = 1000
+        quoted_cols = [f'"{col}"' for col in insert_cols]
+        placeholders = ', '.join(['%s'] * len(insert_cols))
+        conflict_cols = ['conid', 'time']  # Assuming primary key
+        query = f"INSERT INTO {schema}.{table} ({', '.join(quoted_cols)}) VALUES ({placeholders}) ON CONFLICT ({', '.join(conflict_cols)}) DO NOTHING"
+        
         with conn.cursor() as cur:
             for i in range(0, len(df), batch_size):
                 batch = df.iloc[i:i+batch_size]
                 values = [tuple(row) for row in batch.values]
-                placeholders = ', '.join(['%s'] * len(insert_cols))
-                query = f"INSERT INTO {schema}.{table} ({', '.join(insert_cols)}) VALUES ({placeholders})"
                 execute_values(cur, query, values)
         conn.commit()
         logging.info(f"Inserted {len(df)} OHLCV bars for {symbol} into {table}")
