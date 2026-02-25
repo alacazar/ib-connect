@@ -121,3 +121,11 @@ LINE 1: INSERT INTO finance.ohlcv_1d ("conid", "symbol", "time", "op...
 2026-02-25 22:14:26 - INFO - Insert columns: ['conid', 'symbol', 'day', 'open', 'high', 'low', 'close', 'volume', 'trades']
 2026-02-25 22:14:26 - ERROR - Error processing OHLCV file ./input\AAPL.265598.1day.csv: 'time'
 2026-02-25 22:14:26 - ERROR - Moved AAPL.265598.1day.csv to errors
+2026-02-25 22:16:29 - INFO - Connected to DB
+2026-02-25 22:16:34 - INFO - Detected separator: ',' for AAPL.265598.1day.csv
+2026-02-25 22:16:34 - INFO - Raw columns in CSV: ['date', 'open', 'high', 'low', 'close', 'volume', 'average', 'trades']
+2026-02-25 22:16:34 - INFO - Lowercase columns: ['date', 'open', 'high', 'low', 'close', 'volume', 'average', 'trades']
+2026-02-25 22:16:34 - INFO - Number of rows: 365
+2026-02-25 22:16:34 - INFO - Insert columns: ['conid', 'symbol', 'day', 'open', 'high', 'low', 'close', 'volume', 'trades']
+2026-02-25 22:16:34 - ERROR - Error processing OHLCV file ./input\AAPL.265598.1day.csv: 'time'
+2026-02-25 22:16:34 - ERROR - Moved AAPL.265598.1day.csv to errors

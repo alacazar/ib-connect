@@ -171,6 +171,8 @@ def process_ohlcv_file(filepath, conn, schema):
             logging.error(f"No time column found in {filename}")
             return False
         
+        logging.info(f"Detected time column: {col_map['time']}")
+        
         mandatory = ['open', 'high', 'low', 'close']
         for col in mandatory:
             if col not in df.columns:
@@ -215,6 +217,12 @@ def process_ohlcv_file(filepath, conn, schema):
         if 'adj_close' in rename_map:
             rename_map['adjusted_close'] = 'adj_close'
         df = df.rename(columns=rename_map)
+        
+        # Cast types for PG
+        if table == 'ohlcv_1d':
+            df['volume'] = df['volume'].astype(int)
+            if 'trades' in df.columns:
+                df['trades'] = df['trades'].astype(int)
         
         # Select columns, map time to correct column
         insert_cols = ['conid', 'symbol', time_col_name, 'open', 'high', 'low', 'close'] + [k for k in optional if k in df.columns]
