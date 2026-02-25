@@ -145,8 +145,12 @@ def process_ohlcv_file(filepath, conn, schema):
             else:
                 sep = ','
         
+        logging.info(f"Detected separator: '{sep}' for {filename}")
+        
         # Read CSV
         df = pd.read_csv(filepath, sep=sep)
+        logging.info(f"Columns in CSV: {df.columns.tolist()}")
+        logging.info(f"Number of rows: {len(df)}")
         if df.empty:
             logging.error(f"Empty CSV: {filename}")
             return False
@@ -211,6 +215,7 @@ def process_ohlcv_file(filepath, conn, schema):
         # Select columns, map time to correct column
         time_col_name = 'day' if table == 'ohlcv_1d' else 'time_1m'
         insert_cols = ['conid', 'symbol', time_col_name, 'open', 'high', 'low', 'close'] + [k for k in optional if k in df.columns]
+        logging.info(f"Insert columns: {insert_cols}")
         df = df[insert_cols]
         
         # Convert time to timestamp
