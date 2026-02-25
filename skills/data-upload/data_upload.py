@@ -320,7 +320,10 @@ def main():
     
     try:
         while True:
-            process_files(input_folder, processed_folder, error_folder, conn, processed_files)
+            try:
+                process_files(input_folder, processed_folder, error_folder, conn, processed_files)
+            except Exception as e:
+                logging.error(f"Error in main loop: {e}")
             time.sleep(5)  # Poll every 5 seconds
     except KeyboardInterrupt:
         pass
