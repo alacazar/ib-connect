@@ -1,0 +1,8 @@
+{
+    "input_folder": "./input",
+    "processed_folder": "./processed",
+    "error_folder": "./errors",
+    "db_uri": "${PG_URI}",
+    "schema": "finance",
+    "contract_table": "contracts"
+}
