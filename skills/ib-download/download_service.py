@@ -20,11 +20,21 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../.
 from shared.ib_connection import IBConnection
 
 def get_chunk_days(bar_size):
-    # Parse bar_size, e.g., '1min' -> 1, '5mins' -> 5
-    match = re.match(r'(\d+)', bar_size)
+    # Parse bar_size, e.g., '1min' -> 1 min, '1hour' -> 60 min, '1day' -> 1440 min
+    match = re.match(r'(\d+)\s*(min|hour|day)s?', bar_size, re.IGNORECASE)
     if match:
-        minutes = int(match.group(1))
-        return 7 * minutes  # Scale linearly
+        num = int(match.group(1))
+        unit = match.group(2).lower()
+        if unit == 'min':
+            minutes = num
+        elif unit == 'hour':
+            minutes = num * 60
+        elif unit == 'day':
+            minutes = num * 1440
+        else:
+            minutes = num  # fallback
+        days = 7 * minutes
+        return min(days, 365)  # Cap at 1 year to avoid excessive chunks
     return 7  # Default
 
 def download_data(ib, conid, start, end, bar_size, show, output_dir, max_retries=3, chunk_duration='7 D', use_rth=False, verbose=False):
