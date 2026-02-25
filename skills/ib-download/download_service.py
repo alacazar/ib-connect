@@ -42,12 +42,12 @@ def download_data(ib, conid, start, end, bar_size, show, output_dir, max_retries
     # Format bar_size to IB's required format
     bar_size_formatted = (bar_size.replace('min', ' min')
                           .replace('hour', ' hour')
-                          .replace('day', ' D')
+                          .replace('day', ' day')
                           .replace('sec', ' sec')
                           .replace('week', ' W')
                           .replace('month', ' M'))
     
-    logging.info(f"Bar size formatted: '{bar_size}' -> '{bar_size_formatted}'")
+    logging.info(f"Download params: conid={conid}, start={start}, end={end}, bar_size='{bar_size}' -> '{bar_size_formatted}', show={show}, duration={chunk_duration}")
     
     contract = Contract(conId=conid)
     contract.includeExpired = False
