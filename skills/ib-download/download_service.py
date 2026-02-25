@@ -126,7 +126,8 @@ def process_job(job_key, params):
                     'result_path': result_path,
                     'error': error_msg
                 }
-                requests.post(webhook_url, json=message)
+                payload = {"message": json.dumps(message)}
+                requests.post(webhook_url, json=payload)
         except Exception as notify_e:
             # Log but don't fail job
             pass
