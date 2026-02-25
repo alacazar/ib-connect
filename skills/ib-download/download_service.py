@@ -13,7 +13,7 @@ import re
 from datetime import datetime, timedelta
 import pytz
 from ib_insync import IB, Contract, util
-from queue import JobQueue
+from job_queue import JobQueue
 
 # Add shared to path
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))

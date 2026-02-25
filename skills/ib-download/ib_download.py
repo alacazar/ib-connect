@@ -9,7 +9,7 @@ import argparse
 import json
 import sys
 import csv
-from queue import JobQueue
+from job_queue import JobQueue
 
 def submit_single_job(queue, args):
     params = {
