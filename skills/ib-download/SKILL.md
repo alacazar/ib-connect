@@ -38,6 +38,7 @@ Returns the current status (pending, processing, completed, failed) and result d
 - `-e, --end` (str): End date (YYYY-MM-DD).
 - `-b, --bar-size` (str): Bar size. Allowed: `1sec`, `5secs`, `15secs`, `30secs`, `1min`, `2mins`, `3mins`, `5mins`, `15mins`, `30mins`, `1hour`, `2hours`, `3hours`, `4hours`, `8hours`, `1day`, `1week`, `1month`.
 - `-A, --agent` (str): Agent name/ID for notifications (e.g., "apoc"). Required for notifications.
+- `-m, --msg` (str): Custom message to include in the notification (e.g., "Load the CSV and run backtest on strategy X").
 
 #### Optional
 - `--show` (str): Data type. Allowed: `TRADES` (default), `MIDPOINT`, `BID`, `ASK`.
@@ -58,8 +59,9 @@ Returns the current status (pending, processing, completed, failed) and result d
 ### Behavior
 - **Job Creation**: Submits a job for background processing. Returns a unique `job_key` immediately.
 - **Processing**: Downloads data in chunks (respecting IB limits), saves as CSV in `output_dir` (e.g., `265598_1min.csv`).
-- **Notification**: On completion/failure, notifies the specified agent with details.
+- **Notification**: On completion/failure, notifies the specified agent with details, including any custom message.
 - **Errors**: Check status for issues (e.g., connection failed, no data).
+- **Agent Instructions**: When receiving a completion notification, summarize and execute the next steps based on the custom message (e.g., "Load data and analyze trends"). This helps agents remember tasks for asynchronous workflows.
 
 ### Examples
 ```bash

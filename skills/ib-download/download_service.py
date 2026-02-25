@@ -149,7 +149,8 @@ def process_job(job_key, params):
                     'result_path': result_path,
                     'error': error_msg
                 }
-                instruction = f"Download job {job_key} {status}. Result path: {result_path or 'N/A'}. Error: {error_msg or 'None'}. Proceed with next steps."
+                custom_msg = params.get('msg', '')
+                instruction = f"Download job {job_key} {status}. Result path: {result_path or 'N/A'}. Error: {error_msg or 'None'}. {custom_msg}"
                 payload = {
                     "message": instruction,
                     "agentId": params['agent'],
