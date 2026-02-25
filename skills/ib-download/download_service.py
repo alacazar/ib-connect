@@ -16,7 +16,7 @@ from ib_insync import IB, Contract, util
 from queue import JobQueue
 
 # Add shared to path
-sys.path.append(os.path.join(os.path.dirname(__file__), '../..'))
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
 from shared.ib_connection import IBConnection
 
 def get_chunk_days(bar_size):
