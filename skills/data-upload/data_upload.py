@@ -11,8 +11,6 @@ import logging
 import hashlib
 import shutil
 import time
-from watchdog.observers import Observer
-from watchdog.events import FileSystemEventHandler
 import psycopg2
 from psycopg2.extras import execute_values
 
@@ -72,27 +70,28 @@ def process_contract_file(filepath, conn, schema, table):
         logging.error(f"Error processing {filepath}: {e}")
         return False
 
-class UploadHandler(FileSystemEventHandler):
-    def __init__(self, input_folder, processed_folder, error_folder, conn):
-        self.input_folder = input_folder
-        self.processed_folder = processed_folder
-        self.error_folder = error_folder
-        self.conn = conn
-        os.makedirs(processed_folder, exist_ok=True)
-        os.makedirs(error_folder, exist_ok=True)
-
-    def on_created(self, event):
-        if event.is_directory:
-            return
-        filepath = event.src_path
-        filename = os.path.basename(filepath)
+def process_files(input_folder, processed_folder, error_folder, conn, processed_files):
+    """Poll for new files and process them."""
+    os.makedirs(processed_folder, exist_ok=True)
+    os.makedirs(error_folder, exist_ok=True)
+    
+    for filename in os.listdir(input_folder):
+        if filename in processed_files:
+            continue
+        filepath = os.path.join(input_folder, filename)
+        if not os.path.isfile(filepath):
+            continue
+        
+        processed_files.add(filename)
         
         if filename.endswith('.json'):
-            success = process_contract_file(filepath, self.conn, 'finance', 'contracts')
+            success = process_contract_file(filepath, conn, 'finance', 'contracts')
             if success:
-                shutil.move(filepath, os.path.join(self.processed_folder, filename))
+                shutil.move(filepath, os.path.join(processed_folder, filename))
+                logging.info(f"Processed and moved {filename} to processed")
             else:
-                shutil.move(filepath, os.path.join(self.error_folder, filename))
+                shutil.move(filepath, os.path.join(error_folder, filename))
+                logging.error(f"Moved {filename} to errors")
 
 def main():
     logging.basicConfig(
@@ -116,17 +115,14 @@ def main():
     
     conn = psycopg2.connect(db_uri)
     
-    observer = Observer()
-    handler = UploadHandler(input_folder, processed_folder, error_folder, conn)
-    observer.schedule(handler, input_folder, recursive=False)
-    observer.start()
+    processed_files = set()
     
     try:
         while True:
-            time.sleep(1)
+            process_files(input_folder, processed_folder, error_folder, conn, processed_files)
+            time.sleep(5)  # Poll every 5 seconds
     except KeyboardInterrupt:
-        observer.stop()
-    observer.join()
+        pass
     conn.close()
 
 if __name__ == '__main__':
