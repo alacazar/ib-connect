@@ -144,7 +144,7 @@ def main():
     parser.add_argument('-f', '--config-file', help='Config file for batch')
     parser.add_argument('-H', '--host', default='127.0.0.1', help='IB host')
     parser.add_argument('-p', '--port', type=int, default=7497, help='IB port')
-    parser.add_argument('-i', '--client-id', type=int, default=1, help='Client ID')
+    parser.add_argument('-i', '--client-id', type=int, default=99, help='Client ID')
     parser.add_argument('--timeout', type=float, default=4.0, help='Timeout')
     parser.add_argument('--max-retries', type=int, default=3, help='Max retries')
     parser.add_argument('--use-rth', action='store_true', help='Use RTH')
