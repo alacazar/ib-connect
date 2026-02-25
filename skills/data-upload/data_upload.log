@@ -84,3 +84,6 @@ LINE 1: ...ract_month, expiration_date, under_conid, strike, right, mul...
 2026-02-25 21:21:22 - INFO - Inserted contract 3034
 2026-02-25 21:21:22 - INFO - Inserted contract 4391
 2026-02-25 21:21:22 - INFO - Processed and moved dow30.json to processed
+2026-02-25 21:50:31 - INFO - Connected to DB
+2026-02-25 21:51:46 - ERROR - Error processing OHLCV file ./input\AAPL.265598.1day.csv: the query contains more than one '%s' placeholder
+2026-02-25 21:51:46 - ERROR - Moved AAPL.265598.1day.csv to errors

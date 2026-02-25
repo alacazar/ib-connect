@@ -217,9 +217,8 @@ def process_ohlcv_file(filepath, conn, schema):
         # Batch insert with conflict handling
         batch_size = 1000
         quoted_cols = [f'"{col}"' for col in insert_cols]
-        placeholders = ', '.join(['%s'] * len(insert_cols))
         conflict_cols = ['conid', 'time']  # Assuming primary key
-        query = f"INSERT INTO {schema}.{table} ({', '.join(quoted_cols)}) VALUES ({placeholders}) ON CONFLICT ({', '.join(conflict_cols)}) DO NOTHING"
+        query = f"INSERT INTO {schema}.{table} ({', '.join(quoted_cols)}) VALUES %s ON CONFLICT ({', '.join(conflict_cols)}) DO NOTHING"
         
         with conn.cursor() as cur:
             for i in range(0, len(df), batch_size):
