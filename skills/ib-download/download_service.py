@@ -114,9 +114,14 @@ def download_data(ib, conid, start, end, bar_size, show, output_dir, max_retries
 
 def process_job(job_key, params):
     try:
+        # Read output_dir from config
+        with open(os.path.join(os.path.dirname(__file__), 'config.json'), 'r') as f:
+            config = json.load(f)
+        output_dir = config.get('output_dir', './data')
+
         chunk_days = get_chunk_days(params['bar_size'])
         chunk_duration = f"{chunk_days} D"
-        
+
         with IBConnection.connect(
             host=params['host'],
             port=params['port'],
@@ -131,7 +136,7 @@ def process_job(job_key, params):
                 params['end'],
                 params['bar_size'],
                 params['show'],
-                params['output_dir'],
+                output_dir,
                 params['max_retries'],
                 chunk_duration,
                 params['use_rth'],

@@ -74,14 +74,13 @@ def validate_format(value):
     if value not in allowed:
         raise ValueError(f"format must be one of: {', '.join(allowed)}")
 
-def submit_single_job(queue, output_dir, args):
+def submit_single_job(queue, args):
     params = {
         'conid': args.conid,
         'start': args.start,
         'end': args.end,
         'bar_size': args.bar_size,
         'show': args.show,
-        'output_dir': output_dir,
         'host': args.host,
         'port': args.port,
         'client_id': args.client_id,
@@ -95,7 +94,7 @@ def submit_single_job(queue, output_dir, args):
     job_key = queue.submit_job(params)
     print(json.dumps({'job_key': job_key}))
 
-def submit_batch_jobs(queue, output_dir, args):
+def submit_batch_jobs(queue, args):
     with open(args.config_file, 'r') as f:
         reader = csv.DictReader(f)
         for row in reader:
@@ -113,7 +112,6 @@ def submit_batch_jobs(queue, output_dir, args):
                 'end': row['end'],
                 'bar_size': row['bar_size'],
                 'show': show,
-                'output_dir': output_dir,
                 'host': args.host,
                 'port': args.port,
                 'client_id': args.client_id,
@@ -129,11 +127,11 @@ def submit_batch_jobs(queue, output_dir, args):
 
 def main():
     parser = argparse.ArgumentParser(description="IB Download: Submit jobs or query status.")
-    
+
     # Status mode
     parser.add_argument('--status', action='store_true', help='Query job status')
     parser.add_argument('-k', '--key', help='Job key for status query')
-    
+
     # Submit mode
     parser.add_argument('-c', '--conid', type=int, help='Contract ID')
     parser.add_argument('-s', '--start', help='Start date (YYYY-MM-DD)')
@@ -188,10 +186,6 @@ def main():
 
     queue = JobQueue()
 
-    with open(os.path.join(os.path.dirname(__file__), 'config.json'), 'r') as f:
-        config = json.load(f)
-    output_dir = config.get('output_dir', './data')
-
     if args.status:
         if not args.key:
             print("Error: --key required for --status", file=sys.stderr)
@@ -200,9 +194,9 @@ def main():
         print(json.dumps(status))
     else:
         if args.config_file:
-            submit_batch_jobs(queue, output_dir, args)
+            submit_batch_jobs(queue, args)
         elif args.conid and args.start and args.end and args.bar_size:
-            submit_single_job(queue, output_dir, args)
+            submit_single_job(queue, args)
         else:
             print("Error: Provide --conid --start --end --bar-size or --config-file", file=sys.stderr)
             sys.exit(1)
