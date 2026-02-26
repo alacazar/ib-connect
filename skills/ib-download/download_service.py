@@ -13,6 +13,7 @@ import re
 import logging
 from datetime import datetime, timedelta
 import pytz
+import psutil
 from ib_insync import IB, Contract, util
 from job_queue import JobQueue
 
@@ -39,14 +40,23 @@ def get_chunk_days(bar_size):
     return 7  # Default
 
 def download_data(ib, conid, start, end, bar_size, show, output_dir, max_retries=3, chunk_duration='7 D', use_rth=False, verbose=False):
-    
+
     contract = Contract(conId=conid)
     contract.includeExpired = False
     ib.qualifyContracts(contract)
-    
-    eastern = pytz.timezone('US/Eastern')
-    end_dt = eastern.localize(datetime.strptime(end, '%Y-%m-%d').replace(hour=16, minute=15))
-    start_dt = eastern.localize(datetime.strptime(start, '%Y-%m-%d'))
+    # Get contract details for timezone
+    details = ib.reqContractDetails(contract)
+    if details:
+        tz = details[0].timeZoneId  # e.g., 'US/Eastern'
+        tz_filename = tz.replace('/', '-').lower()  # 'us-eastern'
+        contract_tz = pytz.timezone(tz)
+    else:
+        tz = 'US/Eastern'  # fallback
+        tz_filename = 'us-eastern'
+        contract_tz = pytz.timezone(tz)
+
+    end_dt = contract_tz.localize(datetime.strptime(end, '%Y-%m-%d').replace(hour=16, minute=15))
+    start_dt = contract_tz.localize(datetime.strptime(start, '%Y-%m-%d'))
 
     logging.info(f"Download params: conid={conid}, start={start}, end={end_dt}, bar_size='{bar_size}', show={show}, duration={chunk_duration}")
    
@@ -69,13 +79,13 @@ def download_data(ib, conid, start, end, bar_size, show, output_dir, max_retries
                     all_bars.extend(bars)
                     if verbose:
                         print(f"  + {len(bars)} bars (to {bars[0].date})")
-                    # bars[0].date is naive datetime in exchange tz, localize to eastern
+                    # bars[0].date is naive datetime in exchange tz, localize to contract tz
                     if isinstance(bars[0].date, datetime):
-                        end_dt = eastern.localize(bars[0].date) - timedelta(seconds=1)
+                        end_dt = contract_tz.localize(bars[0].date) - timedelta(seconds=1)
                     else:
                         # If date, combine with time and localize
                         dt = datetime.combine(bars[0].date, datetime.min.time())
-                        end_dt = eastern.localize(dt) - timedelta(seconds=1)
+                        end_dt = contract_tz.localize(dt) - timedelta(seconds=1)
                     time.sleep(20)  # Pacing
                     break
                 else:
@@ -94,7 +104,9 @@ def download_data(ib, conid, start, end, bar_size, show, output_dir, max_retries
         df = util.df(all_bars)
         df = df.rename(columns={'barCount': 'trades'}).sort_values('date').drop_duplicates()
         os.makedirs(output_dir, exist_ok=True)
-        filename = f"{conid}_{bar_size}.csv"
+        # Format filename for data_upload: <symbol>.<conid>.<barsize>.<tz>.csv
+        bar_size_clean = bar_size.replace(' ', '').replace('min', 'min').replace('hour', 'hour').replace('day', 'day')
+        filename = f"{contract.symbol}.{conid}.{bar_size_clean}.{tz_filename}.csv"
         filepath = os.path.join(output_dir, filename)
         df.to_csv(filepath, index=False)
         return filepath
@@ -155,7 +167,6 @@ def process_job(job_key, params):
                     "message": instruction,
                     "agentId": params['agent'],
                     "name": "DownloadComplete",
-                    "sessionKey": f"hook:download:{job_key}",
                     "thinking": "low",
                     "deliver": True
                 }
@@ -164,37 +175,58 @@ def process_job(job_key, params):
                 if 'token' in config:
                     headers["Authorization"] = f"Bearer {config['token']}"
                 response = requests.post(webhook_url, json=payload, headers=headers)
-                logging.info(f"Notification sent for job {job_key}, response: {response.status_code}")
+                logging.info(f"Notification sent for job {job_key}, response: {response.status_code} - {response.text}")
         except Exception as notify_e:
             logging.error(f"Notification failed for job {job_key}: {notify_e}")
     
     return status, result_path, error_msg
 
 def main():
-    logging.basicConfig(
-        filename=os.path.join(os.path.dirname(__file__), 'download_service.log'),
-        level=logging.INFO,
-        format='%(asctime)s - %(levelname)s - %(message)s',
-        datefmt='%Y-%m-%d %H:%M:%S'
-    )
-    logging.info("Download service started")
-    
-    queue = JobQueue()
-    while True:
+    lock_file = os.path.join(os.path.dirname(__file__), 'service.lock')
+    if os.path.exists(lock_file):
+        with open(lock_file, 'r') as f:
+            pid = f.read().strip()
         try:
-            job = queue.get_pending_job()
-            if job:
-                job_key, params = job
-                logging.info(f"Processing job {job_key} for conid {params['conid']}")
-                status, result_path, error_msg = process_job(job_key, params)
-                logging.info(f"Job {job_key} completed with status: {status}")
-                if error_msg:
-                    logging.error(f"Job {job_key} error: {error_msg}")
-                queue.update_status(job_key, status, result_path, error_msg)
-            time.sleep(5)  # Poll interval
-        except Exception as e:
-            logging.error(f"Service error: {e}")
-            time.sleep(10)  # Longer sleep on error
+            pid_int = int(pid)
+            if any(p.pid == pid_int for p in psutil.process_iter() if 'python' in p.name().lower()):
+                logging.error("Another instance is running")
+                return
+        except (ValueError, psutil.NoSuchProcess):
+            pass  # Lock file stale
+    with open(lock_file, 'w') as f:
+        f.write(str(os.getpid()))
+
+    try:
+        logging.basicConfig(
+            filename=os.path.join(os.path.dirname(__file__), 'download_service.log'),
+            level=logging.INFO,
+            format='%(asctime)s - %(levelname)s - %(message)s',
+            datefmt='%Y-%m-%d %H:%M:%S'
+        )
+        logging.info("Download service started")
+
+        queue = JobQueue()
+        while True:
+            try:
+                job = queue.get_pending_job()
+                if job:
+                    job_key, params = job
+                    logging.info(f"Processing job {job_key} for conid {params['conid']}")
+                    status, result_path, error_msg = process_job(job_key, params)
+                    logging.info(f"Job {job_key} completed with status: {status}")
+                    if error_msg:
+                        logging.error(f"Job {job_key} error: {error_msg}")
+                    queue.update_status(job_key, status, result_path, error_msg)
+                time.sleep(5)  # Poll interval
+            except Exception as e:
+                logging.error(f"Service error: {e}")
+                time.sleep(10)  # Longer sleep on error
+
+    except KeyboardInterrupt:
+        pass
+    finally:
+        if os.path.exists(lock_file):
+            os.remove(lock_file)
 
 if __name__ == '__main__':
     main()

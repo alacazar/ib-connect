@@ -4,5 +4,7 @@
     "error_folder": "./errors",
     "db_uri": "${PG_URI}",
     "schema": "finance",
-    "contract_table": "contracts"
+    "contract_table": "contracts",
+    "ohlcv_1m_table": "ohlcv_1m",
+    "ohlcv_1d_table": "ohlcv_1d"
 }

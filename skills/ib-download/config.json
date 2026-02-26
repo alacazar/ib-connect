@@ -1,4 +1,6 @@
 {
     "webhook_url": "http://localhost:18789/hooks/agent",
-    "token": "webhook-team-secret-456"
+    "token": "webhook-team-secret-456",
+    "db_path": "C:\\Users\\clawuser\\.openclaw\\shared\\services\\ib_download_service\\jobs.db",
+    "output_dir": "./data"
 }
