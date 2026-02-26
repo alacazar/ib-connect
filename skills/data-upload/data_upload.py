@@ -13,6 +13,7 @@ import shutil
 import time
 import pandas as pd
 import psycopg2
+import psutil
 from psycopg2.extras import execute_values
 import pytz
 from watchdog.observers import Observer
@@ -296,51 +297,72 @@ class DataFileHandler(FileSystemEventHandler):
                 pass
 
 def main():
-    with open('config.json', 'r') as f:
-        config = json.load(f)
-
-    input_folder = config['input_folder']
-    processed_folder = config['processed_folder']
-    error_folder = config['error_folder']
-    db_uri = os.environ.get('PG_URI', os.path.expandvars(config.get('db_uri', '')))
-
-    if not db_uri:
-        print("No DB URI provided")
-        return
-
-    logging.basicConfig(
-        filename='data_upload.log',
-        level=logging.INFO,
-        format='%(asctime)s - %(levelname)s - %(message)s',
-        datefmt='%Y-%m-%d %H:%M:%S'
-    )
+    lock_file = os.path.join(os.path.dirname(__file__), 'service.lock')
+    if os.path.exists(lock_file):
+        with open(lock_file, 'r') as f:
+            pid = f.read().strip()
+        try:
+            pid_int = int(pid)
+            if any(p.pid == pid_int for p in psutil.process_iter() if 'python' in p.name().lower()):
+                logging.error("Another instance is running")
+                return
+        except (ValueError, psutil.NoSuchProcess):
+            pass  # Lock file stale
+    with open(lock_file, 'w') as f:
+        f.write(str(os.getpid()))
 
     try:
-        conn = psycopg2.connect(db_uri)
-        logging.info("Connected to DB")
-    except Exception as e:
-        logging.error(f"DB connection failed: {e}")
-        return
+        with open('config.json', 'r') as f:
+            config = json.load(f)
 
-    # Set up file watcher
-    event_handler = DataFileHandler(input_folder, processed_folder, error_folder, conn, config)
-    observer = Observer()
-    observer.schedule(event_handler, input_folder, recursive=False)
+        input_folder = config['input_folder']
+        processed_folder = config['processed_folder']
+        error_folder = config['error_folder']
+        db_uri = os.environ.get('PG_URI', os.path.expandvars(config.get('db_uri', '')))
 
-    try:
-        observer.start()
-        logging.info("Data upload service started successfully - monitoring input folder for .json and .csv files")
-        # Process any existing files on startup
-        for filename in os.listdir(input_folder):
-            filepath = os.path.join(input_folder, filename)
-            if os.path.isfile(filepath) and (filename.endswith('.json') or filename.endswith('.csv')):
-                event_handler.on_created(type('Event', (), {'is_directory': False, 'src_path': filepath})())
-        while True:
-            time.sleep(1)
+        if not db_uri:
+            print("No DB URI provided")
+            return
+
+        logging.basicConfig(
+            filename='data_upload.log',
+            level=logging.INFO,
+            format='%(asctime)s - %(levelname)s - %(message)s',
+            datefmt='%Y-%m-%d %H:%M:%S'
+        )
+
+        try:
+            conn = psycopg2.connect(db_uri)
+            logging.info("Connected to DB")
+        except Exception as e:
+            logging.error(f"DB connection failed: {e}")
+            return
+
+        # Set up file watcher
+        event_handler = DataFileHandler(input_folder, processed_folder, error_folder, conn, config)
+        observer = Observer()
+        observer.schedule(event_handler, input_folder, recursive=False)
+
+        try:
+            observer.start()
+            logging.info("Data upload service started successfully - monitoring input folder for .json and .csv files")
+            # Process any existing files on startup
+            for filename in os.listdir(input_folder):
+                filepath = os.path.join(input_folder, filename)
+                if os.path.isfile(filepath) and (filename.endswith('.json') or filename.endswith('.csv')):
+                    event_handler.on_created(type('Event', (), {'is_directory': False, 'src_path': filepath})())
+            while True:
+                time.sleep(1)
+        except KeyboardInterrupt:
+            observer.stop()
+        observer.join()
+        conn.close()
+
     except KeyboardInterrupt:
-        observer.stop()
-    observer.join()
-    conn.close()
+        pass
+    finally:
+        if os.path.exists(lock_file):
+            os.remove(lock_file)
 
 if __name__ == '__main__':
     main()
