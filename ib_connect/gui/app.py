@@ -63,12 +63,27 @@ def query_contracts():
 def save_contracts():
     data = request.json
     selected = data.get('selected', [])
+    # Add defaults for missing required fields
+    for contract in selected:
+        if 'time_zone_id' not in contract or not contract['time_zone_id']:
+            contract['time_zone_id'] = 'US/Eastern'
+        if 'min_tick' not in contract or not contract['min_tick']:
+            contract['min_tick'] = 0.01
+        if 'tick_value' not in contract or not contract['tick_value']:
+            contract['tick_value'] = contract.get('min_tick', 0.01) * contract.get('multiplier', 1)
+        if 'multiplier' not in contract or not contract['multiplier']:
+            contract['multiplier'] = 1
+    # Omit empty strings and zero values, keep None for db defaults
+    cleaned_selected = []
+    for contract in selected:
+        cleaned = {k: v for k, v in contract.items() if v not in ('', 0)}
+        cleaned_selected.append(cleaned)
     folder = config['contracts_folder']
     os.makedirs(folder, exist_ok=True)
     timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
     file_path = os.path.join(folder, f'selected_contracts_{timestamp}.json')
     with open(file_path, 'w') as f:
-        json.dump(selected, f, indent=2)
+        json.dump(cleaned_selected, f, indent=2)
     return jsonify({'success': True, 'file': file_path})
 
 @app.route('/download', methods=['POST'])

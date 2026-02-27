@@ -70,7 +70,6 @@
             <!-- Middle Panel: Results Grid -->
             <div class="col-7">
                 <h4>Results</h4>
-                <button id="selectAll" class="btn btn-secondary mb-2">Select All</button>
                 <button id="deleteSelected" class="btn btn-danger mb-2">Delete Selected</button>
                 <button id="saveContracts" class="btn btn-success mb-2">Save Contracts</button>
                 <button id="downloadData" class="btn btn-warning mb-2">Download Data</button>
@@ -220,13 +219,7 @@
             checkboxes.forEach(cb => cb.checked = e.target.checked);
         });
 
-        let allSelected = false;
-        document.getElementById('selectAll').addEventListener('click', () => {
-            allSelected = !allSelected;
-            const checkboxes = document.querySelectorAll('.contractCheckbox');
-            checkboxes.forEach(cb => cb.checked = allSelected);
-            document.getElementById('selectAll').textContent = allSelected ? 'Deselect All' : 'Select All';
-        });
+
 
         document.getElementById('deleteSelected').addEventListener('click', () => {
             const checkboxes = document.querySelectorAll('.contractCheckbox:checked');

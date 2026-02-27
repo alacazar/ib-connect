@@ -98,10 +98,10 @@ async def query_ib(args_dict):
                         "strike": detail.contract.strike or '',
                         "right": detail.contract.right or '',
                         "multiplier": multiplier,
-                        "time_zone_id": detail.timeZoneId,
+                        "time_zone_id": detail.timeZoneId or 'US/Eastern',
                     }
-                    # Filter out None (keep empty strings as '')
-                    filtered = {k: v for k, v in raw.items() if v is not None}
+                    # Keep all fields, including None
+                    filtered = raw
                     results.append(filtered)
                 return results if len(results) > 1 else results[0]
     

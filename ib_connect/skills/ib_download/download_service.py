@@ -48,6 +48,9 @@ def download_data(ib, conid, start, end, bar_size, show, output_dir, max_retries
     details = ib.reqContractDetails(contract)
     if details:
         tz = details[0].timeZoneId  # e.g., 'US/Eastern'
+        tz = tz.strip() if tz else ''
+        if not tz:
+            tz = 'US/Eastern'  # fallback for empty timezone
         tz_filename = tz.replace('/', '-').lower()  # 'us-eastern'
         contract_tz = pytz.timezone(tz)
     else:
@@ -88,11 +91,13 @@ def download_data(ib, conid, start, end, bar_size, show, output_dir, max_retries
                         print(f"  + {len(bars)} bars (to {bars[0].date})")
                     # bars[0].date is naive datetime in exchange tz, localize to contract tz
                     if isinstance(bars[0].date, datetime):
-                        end_dt = contract_tz.localize(bars[0].date) - timedelta(seconds=1)
+                        naive_date = bars[0].date.replace(tzinfo=None) if bars[0].date.tzinfo else bars[0].date
+                        end_dt = contract_tz.localize(naive_date) - timedelta(seconds=1)
                     else:
                         # If date, combine with time and localize
                         dt = datetime.combine(bars[0].date, datetime.min.time())
-                        end_dt = contract_tz.localize(dt) - timedelta(seconds=1)
+                        naive_date = dt.replace(tzinfo=None) if dt.tzinfo else dt
+                        end_dt = contract_tz.localize(naive_date) - timedelta(seconds=1)
                     time.sleep(20)  # Pacing
                     break
                 else:
@@ -111,16 +116,17 @@ def download_data(ib, conid, start, end, bar_size, show, output_dir, max_retries
         df = util.df(all_bars)
         df = df.rename(columns={'barCount': 'trades'}).sort_values('date').drop_duplicates()
         os.makedirs(output_dir, exist_ok=True)
-        # Format filename for data_upload: <symbol>.<conid>.<barsize>.<tz>.csv or .json
+        # Format filename for data_upload: <localSymbol>.<conid>.<barsize>.<tz>.csv or .json (spaces in localSymbol replaced with _)
         bar_size_clean = bar_size.replace(' ', '').replace('min', 'min').replace('hour', 'hour').replace('day', 'day')
+        local_symbol_clean = contract.localSymbol.replace(' ', '_')
         if format == 'json':
-            filename = f"{contract.symbol}.{conid}.{bar_size_clean}.{tz_filename}.json"
+            filename = f"{local_symbol_clean}.{conid}.{bar_size_clean}.{tz_filename}.json"
             filepath = os.path.join(output_dir, filename)
             if progress_callback:
                 progress_callback("Saving data to JSON")
             df.to_json(filepath, orient='records')
         else:
-            filename = f"{contract.symbol}.{conid}.{bar_size_clean}.{tz_filename}.csv"
+            filename = f"{local_symbol_clean}.{conid}.{bar_size_clean}.{tz_filename}.csv"
             filepath = os.path.join(output_dir, filename)
             if progress_callback:
                 progress_callback("Saving data to CSV")
@@ -172,8 +178,10 @@ def process_job(job_key, params):
                 status, result_path, error_msg = 'completed', None, 'No data found'
                 message = "Download completed: No data found"
     except Exception as e:
-        status, result_path, error_msg = 'failed', None, str(e)
-        message = f"Download failed: {str(e)}"
+        logging.error(f"Job {job_key} failed with exception: {type(e).__name__}: {e}", exc_info=True)
+        error_msg = f"{type(e).__name__}: {str(e) or 'No message'}"
+        status, result_path = 'failed', None
+        message = f"Download failed: {error_msg}"
     
     # Notify via webhook if agent specified
     if params.get('agent'):

@@ -6,7 +6,9 @@ Query Interactive Brokers for contract details.
 """
 
 import argparse
+import asyncio
 import json
+import logging
 import sys
 from query import query_ib
 
@@ -34,7 +36,7 @@ def main():
     args = parser.parse_args()
     
     try:
-        result = query_ib(vars(args))
+        result = asyncio.run(query_ib(vars(args)))
         
         if args.output_format == 'json':
             print(json.dumps(result, indent=2))
