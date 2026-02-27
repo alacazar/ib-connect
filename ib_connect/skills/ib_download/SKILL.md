@@ -1,7 +1,7 @@
 ---
 name: ib-download
 description: Asynchronous historical data downloader for Interactive Brokers. Submits download jobs and notifies on completion.
-location: C:\Users\clawuser\.openclaw\shared\projects\ib-connect\skills\ib-download\ib_download.py
+location: C:\Users\clawuser\.openclaw\shared\projects\ib_connect\ib_connect\skills\ib_download\ib_download.py
 ---
 
 ## IB Download Skill

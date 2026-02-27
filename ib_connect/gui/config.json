@@ -3,7 +3,8 @@
   "port": 5000,
   "contracts_folder": "C:\\Users\\clawuser\\.openclaw\\shared\\data\\contracts\\",
   "downloads_folder": "C:\\Users\\clawuser\\.openclaw\\shared\\data\\downloads\\",
+  "job_queue_db": "C:\\Users\\clawuser\\.openclaw\\shared\\services\\ib_download_service\\jobs.db",
   "ib_host": "127.0.0.1",
   "ib_port": 7497,
-  "ib_client_id": 1
+  "ib_client_id": 77
 }

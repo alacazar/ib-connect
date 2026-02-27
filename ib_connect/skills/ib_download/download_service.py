@@ -39,7 +39,7 @@ def get_chunk_days(bar_size):
         return min(days, 365)  # Cap at 1 year to avoid excessive chunks
     return 7  # Default
 
-def download_data(ib, conid, start, end, bar_size, show, output_dir, max_retries=3, chunk_duration='7 D', use_rth=False, verbose=False, progress_callback=None):
+def download_data(ib, conid, start, end, bar_size, show, output_dir, max_retries=3, chunk_duration='7 D', use_rth=False, verbose=False, progress_callback=None, format='csv'):
 
     contract = Contract(conId=conid)
     contract.includeExpired = False
@@ -62,6 +62,9 @@ def download_data(ib, conid, start, end, bar_size, show, output_dir, max_retries
    
     all_bars = []
     chunk_count = 0
+
+    if progress_callback:
+        progress_callback(f"Starting data download for conid {conid}")
 
     while True:
         for attempt in range(max_retries):
@@ -108,11 +111,20 @@ def download_data(ib, conid, start, end, bar_size, show, output_dir, max_retries
         df = util.df(all_bars)
         df = df.rename(columns={'barCount': 'trades'}).sort_values('date').drop_duplicates()
         os.makedirs(output_dir, exist_ok=True)
-        # Format filename for data_upload: <symbol>.<conid>.<barsize>.<tz>.csv
+        # Format filename for data_upload: <symbol>.<conid>.<barsize>.<tz>.csv or .json
         bar_size_clean = bar_size.replace(' ', '').replace('min', 'min').replace('hour', 'hour').replace('day', 'day')
-        filename = f"{contract.symbol}.{conid}.{bar_size_clean}.{tz_filename}.csv"
-        filepath = os.path.join(output_dir, filename)
-        df.to_csv(filepath, index=False)
+        if format == 'json':
+            filename = f"{contract.symbol}.{conid}.{bar_size_clean}.{tz_filename}.json"
+            filepath = os.path.join(output_dir, filename)
+            if progress_callback:
+                progress_callback("Saving data to JSON")
+            df.to_json(filepath, orient='records')
+        else:
+            filename = f"{contract.symbol}.{conid}.{bar_size_clean}.{tz_filename}.csv"
+            filepath = os.path.join(output_dir, filename)
+            if progress_callback:
+                progress_callback("Saving data to CSV")
+            df.to_csv(filepath, index=False)
         return filepath
     return None
 
@@ -130,10 +142,10 @@ def process_job(job_key, params):
         queue.update_status(job_key, 'processing', message=f"Starting download for conid {params['conid']}")
 
         with IBConnection.connect(
-            host=params['host'],
-            port=params['port'],
-            clientId=params['client_id'],
-            timeout=params['timeout'],
+            host=config.get('ib_host', '127.0.0.1'),
+            port=config.get('ib_port', 7497),
+            clientId=config.get('ib_client_id', 1),
+            timeout=config.get('timeout', 4.0),
             readonly=True
         ) as ib:
             progress_callback = lambda msg: queue.update_status(job_key, 'processing', message=msg)
@@ -143,18 +155,19 @@ def process_job(job_key, params):
                 params['start'],
                 params['end'],
                 params['bar_size'],
-                params['show'],
+                params.get('show', 'TRADES'),
                 output_dir,
-                params['max_retries'],
+                config.get('max_retries', 3),
                 chunk_duration,
-                params['use_rth'],
+                params.get('use_rth', False),
                 verbose=False,  # Can add verbose to params
-                progress_callback=progress_callback
+                progress_callback=progress_callback,
+                format=params.get('format', 1)
             )
             queue.update_status(job_key, 'processing', message=f"Saving data to CSV for conid {params['conid']}")
             if result_path:
                 status, result_path, error_msg = 'completed', result_path, None
-                message = f"Download completed: {result_path}"
+                message = f"Download completed: {os.path.basename(result_path)}"
             else:
                 status, result_path, error_msg = 'completed', None, 'No data found'
                 message = "Download completed: No data found"
@@ -166,12 +179,11 @@ def process_job(job_key, params):
     if params.get('agent'):
         try:
             import requests
-            import json
             with open(os.path.join(os.path.dirname(__file__), 'config.json'), 'r') as f:
                 config = json.load(f)
             webhook_url = config.get('webhook_url')
             if webhook_url:
-                message = {
+                webhook_message = {
                     'event': 'download_complete',
                     'job_key': job_key,
                     'agent': params['agent'],
@@ -197,7 +209,7 @@ def process_job(job_key, params):
         except Exception as notify_e:
             logging.error(f"Notification failed for job {job_key}: {notify_e}")
     
-    return status, result_path, error_msg
+    return status, result_path, error_msg, message
 
 def main():
     lock_file = os.path.join(os.path.dirname(__file__), 'service.lock')
@@ -230,7 +242,7 @@ def main():
                 if job:
                     job_key, params = job
                     logging.info(f"Processing job {job_key} for conid {params['conid']}")
-                    status, result_path, error_msg = process_job(job_key, params)
+                    status, result_path, error_msg, message = process_job(job_key, params)
                     logging.info(f"Job {job_key} completed with status: {status}")
                     if error_msg:
                         logging.error(f"Job {job_key} error: {error_msg}")

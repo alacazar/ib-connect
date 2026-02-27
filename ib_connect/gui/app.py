@@ -14,7 +14,7 @@ from datetime import datetime
 
 
 from ib_connect.skills.ib_query.query import query_ib
-from ib_connect.skills.ib_download.download import submit_download_job, get_job_status
+from ib_connect.skills.ib_download.job_queue import JobQueue
 
 app = Flask(__name__)
 
@@ -76,6 +76,8 @@ def download_data():
     data = request.json
     contracts = data.get('contracts', [])
     downloads_folder = config['downloads_folder']
+    job_queue_db = config['job_queue_db']
+    queue = JobQueue(job_queue_db)
     jobs = []
     for contract in contracts:
         params = {
@@ -88,7 +90,7 @@ def download_data():
             'msg': f"Download {contract['symbol']} data"
         }
         try:
-            job_key = submit_download_job(params)
+            job_key = queue.submit_job(params)
             jobs.append({'contract': contract['symbol'], 'job_key': job_key, 'status': 'submitted'})
         except Exception as e:
             jobs.append({'contract': contract['symbol'], 'error': str(e)})
@@ -97,7 +99,9 @@ def download_data():
 @app.route('/job_status/<job_key>')
 def job_status(job_key):
     try:
-        status_data = get_job_status(job_key)
+        job_queue_db = config['job_queue_db']
+        queue = JobQueue(job_queue_db)
+        status_data = queue.get_status(job_key)
         if status_data['status'] == 'not_found':
             return jsonify({'status': 'error', 'details': 'Job not found'})
         details = f"Status: {status_data.get('status', 'unknown')}"

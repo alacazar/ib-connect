@@ -16,6 +16,7 @@
                         <label>Symbol</label>
                         <input type="text" class="form-control" name="symbol" placeholder="Required if ConId not provided">
                     </div>
+                    <button type="submit" class="btn btn-primary mb-3">Query</button>
                     <div class="mb-3">
                         <label>ConId</label>
                         <input type="number" class="form-control" name="conid" placeholder="Required if Symbol not provided">
@@ -63,7 +64,6 @@
                         <input class="form-check-input" type="checkbox" name="include_expired">
                         <label class="form-check-label">Include Expired</label>
                     </div>
-                    <button type="submit" class="btn btn-primary">Query</button>
                 </form>
             </div>
 
@@ -71,6 +71,7 @@
             <div class="col-7">
                 <h4>Results</h4>
                 <button id="selectAll" class="btn btn-secondary mb-2">Select All</button>
+                <button id="deleteSelected" class="btn btn-danger mb-2">Delete Selected</button>
                 <button id="saveContracts" class="btn btn-success mb-2">Save Contracts</button>
                 <button id="downloadData" class="btn btn-warning mb-2">Download Data</button>
                 <div style="overflow-x: auto;">
@@ -125,6 +126,34 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
+        // Make table sortable
+        document.querySelectorAll('#resultsTable th').forEach((th, index) => {
+            th.style.cursor = 'pointer';
+            th.addEventListener('click', () => {
+                const table = th.closest('table');
+                const tbody = table.querySelector('tbody');
+                const rows = Array.from(tbody.querySelectorAll('tr'));
+                const isNumeric = ['ConId', 'Strike', 'Multiplier', 'Parent'].includes(th.textContent.trim());
+                rows.sort((a, b) => {
+                    const aVal = a.cells[index].textContent.trim();
+                    const bVal = b.cells[index].textContent.trim();
+                    if (isNumeric) {
+                        return parseFloat(aVal) - parseFloat(bVal);
+                    } else {
+                        return aVal.localeCompare(bVal);
+                    }
+                });
+                rows.forEach(row => tbody.appendChild(row));
+            });
+        });
+
+        // Make columns resizable
+        document.querySelectorAll('#resultsTable th').forEach(th => {
+            th.style.resize = 'horizontal';
+            th.style.overflow = 'auto';
+        });
+    </script>
+    <script>
         let selectedContracts = [];
         let activeJobs = [];
 
@@ -161,25 +190,28 @@
 
         function displayResults(contracts) {
             const tbody = document.querySelector('#resultsTable tbody');
-            tbody.innerHTML = '';
-            selectedContracts = [];
             contracts.forEach(contract => {
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td><input type="checkbox" class="contractCheckbox" data-contract='${JSON.stringify(contract)}'></td>
-                    <td>${contract.symbol}</td>
-                    <td>${contract.conid}</td>
-                    <td>${contract.local_symbol || ''}</td>
-                    <td>${contract.exchange}</td>
-                    <td>${contract.currency}</td>
-                    <td>${contract.sec_type}</td>
-                    <td>${contract.expiration_date || ''}</td>
-                    <td>${contract.strike || ''}</td>
-                    <td>${contract.right || ''}</td>
-                    <td>${contract.multiplier || ''}</td>
-                    <td>${contract.under_conid || ''}</td>
-                `;
-                tbody.appendChild(row);
+                // Check if already exists
+                const existing = selectedContracts.find(c => c.conid === contract.conid);
+                if (!existing) {
+                    selectedContracts.push(contract);
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td><input type="checkbox" class="contractCheckbox" data-contract='${JSON.stringify(contract)}'></td>
+                        <td>${contract.symbol}</td>
+                        <td>${contract.conid}</td>
+                        <td>${contract.local_symbol || ''}</td>
+                        <td>${contract.exchange}</td>
+                        <td>${contract.currency}</td>
+                        <td>${contract.sec_type}</td>
+                        <td>${contract.expiration_date || ''}</td>
+                        <td>${contract.strike || ''}</td>
+                        <td>${contract.right || ''}</td>
+                        <td>${contract.multiplier || ''}</td>
+                        <td>${contract.under_conid || ''}</td>
+                    `;
+                    tbody.appendChild(row);
+                }
             });
         }
 
@@ -194,6 +226,15 @@
             const checkboxes = document.querySelectorAll('.contractCheckbox');
             checkboxes.forEach(cb => cb.checked = allSelected);
             document.getElementById('selectAll').textContent = allSelected ? 'Deselect All' : 'Select All';
+        });
+
+        document.getElementById('deleteSelected').addEventListener('click', () => {
+            const checkboxes = document.querySelectorAll('.contractCheckbox:checked');
+            checkboxes.forEach(cb => {
+                const contract = JSON.parse(cb.dataset.contract);
+                selectedContracts = selectedContracts.filter(c => c.conid !== contract.conid);
+                cb.closest('tr').remove();
+            });
         });
 
         document.getElementById('saveContracts').addEventListener('click', async () => {
@@ -217,13 +258,23 @@
         });
 
         function showDownloadModal(contracts) {
+            selectedContracts = contracts;  // Store for submission
             const list = document.getElementById('downloadList');
             list.innerHTML = '';
             contracts.forEach((contract, index) => {
                 const div = document.createElement('div');
                 div.className = 'mb-3 border p-2';
+                div.dataset.conid = contract.conid;
                 div.innerHTML = `
                     <h6>${contract.symbol} (${contract.local_symbol || contract.symbol})</h6>
+                    <div class="row mb-2">
+                        <div class="col-auto">
+                            <button class="btn btn-secondary btn-sm copyAbove" onclick="copyAbove(this)">Copy Above</button>
+                        </div>
+                        <div class="col-auto ms-auto">
+                            <button class="btn btn-danger btn-sm" onclick="removeContract(${index})">Remove</button>
+                        </div>
+                    </div>
                     <div class="row">
                         <div class="col">
                             <label>Start Date</label>
@@ -240,9 +291,6 @@
                                 <option value="1 day">1 day</option>
                             </select>
                         </div>
-                        <div class="col-1">
-                            <button class="btn btn-danger btn-sm" onclick="removeContract(${index})">X</button>
-                        </div>
                     </div>
                 `;
                 list.appendChild(div);
@@ -251,7 +299,25 @@
         }
 
         function removeContract(index) {
-            document.querySelectorAll('#downloadList .mb-3')[index].remove();
+            const div = document.querySelectorAll('#downloadList .mb-3')[index];
+            const conid = div.dataset.conid;
+            selectedContracts = selectedContracts.filter(c => c.conid != conid);
+            div.remove();
+        }
+
+        function copyAbove(button) {
+            const currentDiv = button.closest('.mb-3');
+            const allDivs = document.querySelectorAll('#downloadList .mb-3');
+            const index = Array.from(allDivs).indexOf(currentDiv);
+            if (index > 0) {
+                const aboveDiv = allDivs[index - 1];
+                const aboveStart = aboveDiv.querySelector('.startDate').value;
+                const aboveEnd = aboveDiv.querySelector('.endDate').value;
+                const aboveBar = aboveDiv.querySelector('.barSize').value;
+                currentDiv.querySelector('.startDate').value = aboveStart;
+                currentDiv.querySelector('.endDate').value = aboveEnd;
+                currentDiv.querySelector('.barSize').value = aboveBar;
+            }
         }
 
         document.getElementById('startDownload').addEventListener('click', async () => {
@@ -282,17 +348,29 @@
             activeJobs = result.jobs;
             updateProgress();
             startPolling();
+            alert('Download jobs submitted: ' + result.jobs.length + ' jobs');
             bootstrap.Modal.getInstance(document.getElementById('downloadModal')).hide();
         });
 
         function updateProgress() {
             const area = document.getElementById('progressArea');
-            area.innerHTML = activeJobs.map(job => `
-                <div class="alert alert-info">
-                    <strong>${job.contract}</strong>: ${job.status || job.error}
-                    ${job.job_key ? `(Job: ${job.job_key})` : ''}
-                </div>
-            `).join('');
+            area.innerHTML = activeJobs.map(job => {
+                let alertClass = 'alert-info';
+                const details = job.status || job.error || '';
+                if (details.includes('processing')) {
+                    alertClass = 'alert-warning';
+                } else if (details.includes('completed') && !details.includes('error')) {
+                    alertClass = 'alert-success';
+                } else if (details.includes('failed') || details.includes('error')) {
+                    alertClass = 'alert-danger';
+                }
+                return `
+                    <div class="alert ${alertClass}">
+                        <strong>${job.contract}</strong>: ${details}
+                        ${job.job_key ? `(Job: ${job.job_key})` : ''}
+                    </div>
+                `;
+            }).join('');
         }
 
         function startPolling() {

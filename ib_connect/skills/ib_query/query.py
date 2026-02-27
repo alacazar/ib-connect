@@ -75,6 +75,9 @@ async def query_ib(args_dict):
                     min_tick = detail.minTick or 0.01
                     multiplier = float(detail.contract.multiplier or 1)
                     tick_value = min_tick * multiplier
+                    exp = detail.contract.lastTradeDateOrContractMonth
+                    if exp and len(str(exp)) == 8:
+                        exp = f"{exp[:4]}-{exp[4:6]}-{exp[6:]}"
                     
                     raw = {
                         "conid": detail.contract.conId,
@@ -90,7 +93,7 @@ async def query_ib(args_dict):
                         "min_tick": min_tick,
                         "tick_value": tick_value,
                         "contract_month": detail.contractMonth,
-                        "expiration_date": detail.contract.lastTradeDateOrContractMonth,
+                        "expiration_date": exp,
                         "under_conid": detail.underConId,
                         "strike": detail.contract.strike or '',
                         "right": detail.contract.right or '',
