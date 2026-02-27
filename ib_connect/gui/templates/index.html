@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>IB Data Downloader</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Left Panel: Contract Search -->
+            <div class="col-2">
+                <h4>Contract Search</h4>
+                <form id="queryForm">
+                    <div class="mb-3">
+                        <label>Symbol</label>
+                        <input type="text" class="form-control" name="symbol" placeholder="Required if ConId not provided">
+                    </div>
+                    <div class="mb-3">
+                        <label>ConId</label>
+                        <input type="number" class="form-control" name="conid" placeholder="Required if Symbol not provided">
+                    </div>
+                    <div class="mb-3">
+                        <label>Security Type *</label>
+                        <select class="form-control" name="sec_type">
+                            <option value="STK">STK</option>
+                            <option value="FUT">FUT</option>
+                            <option value="OPT">OPT</option>
+                            <option value="CASH">CASH</option>
+                            <option value="CFD">CFD</option>
+                            <option value="BOND">BOND</option>
+                            <option value="FOP">FOP</option>
+                            <option value="WAR">WAR</option>
+                            <option value="IOPT">IOPT</option>
+                            <option value="CMDTY">CMDTY</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label>Exchange</label>
+                        <input type="text" class="form-control" name="exchange" value="SMART">
+                    </div>
+                    <div class="mb-3">
+                        <label>Currency</label>
+                        <input type="text" class="form-control" name="currency" value="USD">
+                    </div>
+                    <div class="mb-3">
+                        <label>Expiry (YYYYMMDD)</label>
+                        <input type="text" class="form-control" name="expiry">
+                    </div>
+                    <div class="mb-3">
+                        <label>Strike</label>
+                        <input type="number" step="0.01" class="form-control" name="strike">
+                    </div>
+                    <div class="mb-3">
+                        <label>Right</label>
+                        <select class="form-control" name="right">
+                            <option value="">None</option>
+                            <option value="PUT">PUT</option>
+                            <option value="CALL">CALL</option>
+                        </select>
+                    </div>
+                    <div class="form-check mb-3">
+                        <input class="form-check-input" type="checkbox" name="include_expired">
+                        <label class="form-check-label">Include Expired</label>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Query</button>
+                </form>
+            </div>
+
+            <!-- Middle Panel: Results Grid -->
+            <div class="col-7">
+                <h4>Results</h4>
+                <button id="selectAll" class="btn btn-secondary mb-2">Select All</button>
+                <button id="saveContracts" class="btn btn-success mb-2">Save Contracts</button>
+                <button id="downloadData" class="btn btn-warning mb-2">Download Data</button>
+                <div style="overflow-x: auto;">
+                <table id="resultsTable" class="table table-striped table-sm">
+                    <thead>
+                        <tr>
+                            <th><input type="checkbox" id="selectAllCheckbox"></th>
+                            <th>Symbol</th>
+                            <th>ConId</th>
+                            <th>Ticker</th>
+                            <th>Exchange</th>
+                            <th>Currency</th>
+                            <th>Type</th>
+                            <th>Expiry</th>
+                            <th>Strike</th>
+                            <th>Right</th>
+                            <th>Multiplier</th>
+                            <th>Parent</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+                </div>
+            </div>
+
+            <!-- Right Panel: Progress -->
+            <div class="col-3">
+                <h4>Download Jobs</h4>
+                <div id="progressArea"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Download Modal -->
+    <div class="modal fade" id="downloadModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Download Data</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" id="downloadList">
+                    <!-- Contracts will be added here -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" id="startDownload">Download</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        let selectedContracts = [];
+        let activeJobs = [];
+
+        document.getElementById('queryForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const data = Object.fromEntries(formData);
+            if (!data.symbol && !data.conid) {
+                alert('Please provide either Symbol or ConId.');
+                return;
+            }
+            const submitButton = e.target.querySelector('button');
+            submitButton.disabled = true;
+            document.body.style.cursor = 'wait';
+            try {
+                const response = await fetch('/query', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                const result = await response.json();
+                if (result.success) {
+                    displayResults(result.contracts);
+                } else {
+                    alert('Error: ' + result.error);
+                }
+            } catch (error) {
+                alert('Error: ' + error.message);
+            } finally {
+                submitButton.disabled = false;
+                document.body.style.cursor = 'default';
+            }
+        });
+
+        function displayResults(contracts) {
+            const tbody = document.querySelector('#resultsTable tbody');
+            tbody.innerHTML = '';
+            selectedContracts = [];
+            contracts.forEach(contract => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td><input type="checkbox" class="contractCheckbox" data-contract='${JSON.stringify(contract)}'></td>
+                    <td>${contract.symbol}</td>
+                    <td>${contract.conid}</td>
+                    <td>${contract.local_symbol || ''}</td>
+                    <td>${contract.exchange}</td>
+                    <td>${contract.currency}</td>
+                    <td>${contract.sec_type}</td>
+                    <td>${contract.expiration_date || ''}</td>
+                    <td>${contract.strike || ''}</td>
+                    <td>${contract.right || ''}</td>
+                    <td>${contract.multiplier || ''}</td>
+                    <td>${contract.under_conid || ''}</td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        document.getElementById('selectAllCheckbox').addEventListener('change', (e) => {
+            const checkboxes = document.querySelectorAll('.contractCheckbox');
+            checkboxes.forEach(cb => cb.checked = e.target.checked);
+        });
+
+        let allSelected = false;
+        document.getElementById('selectAll').addEventListener('click', () => {
+            allSelected = !allSelected;
+            const checkboxes = document.querySelectorAll('.contractCheckbox');
+            checkboxes.forEach(cb => cb.checked = allSelected);
+            document.getElementById('selectAll').textContent = allSelected ? 'Deselect All' : 'Select All';
+        });
+
+        document.getElementById('saveContracts').addEventListener('click', async () => {
+            const selected = Array.from(document.querySelectorAll('.contractCheckbox:checked')).map(cb => JSON.parse(cb.dataset.contract));
+            if (selected.length === 0) return alert('No contracts selected');
+            const response = await fetch('/save_contracts', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ selected })
+            });
+            const result = await response.json();
+            if (result.success) {
+                alert('Saved to ' + result.file);
+            }
+        });
+
+        document.getElementById('downloadData').addEventListener('click', () => {
+            const selected = Array.from(document.querySelectorAll('.contractCheckbox:checked')).map(cb => JSON.parse(cb.dataset.contract));
+            if (selected.length === 0) return alert('No contracts selected');
+            showDownloadModal(selected);
+        });
+
+        function showDownloadModal(contracts) {
+            const list = document.getElementById('downloadList');
+            list.innerHTML = '';
+            contracts.forEach((contract, index) => {
+                const div = document.createElement('div');
+                div.className = 'mb-3 border p-2';
+                div.innerHTML = `
+                    <h6>${contract.symbol} (${contract.local_symbol || contract.symbol})</h6>
+                    <div class="row">
+                        <div class="col">
+                            <label>Start Date</label>
+                            <input type="date" class="form-control startDate" required>
+                        </div>
+                        <div class="col">
+                            <label>End Date</label>
+                            <input type="date" class="form-control endDate" value="${contract.expiration_date || ''}" required>
+                        </div>
+                        <div class="col">
+                            <label>Bar Size</label>
+                            <select class="form-control barSize">
+                                <option value="1 min">1 min</option>
+                                <option value="1 day">1 day</option>
+                            </select>
+                        </div>
+                        <div class="col-1">
+                            <button class="btn btn-danger btn-sm" onclick="removeContract(${index})">X</button>
+                        </div>
+                    </div>
+                `;
+                list.appendChild(div);
+            });
+            new bootstrap.Modal(document.getElementById('downloadModal')).show();
+        }
+
+        function removeContract(index) {
+            document.querySelectorAll('#downloadList .mb-3')[index].remove();
+        }
+
+        document.getElementById('startDownload').addEventListener('click', async () => {
+            const contracts = [];
+            document.querySelectorAll('#downloadList .mb-3').forEach((div, index) => {
+                const startDate = div.querySelector('.startDate').value;
+                const endDate = div.querySelector('.endDate').value;
+                const barSize = div.querySelector('.barSize').value;
+                if (startDate && endDate) {
+                    contracts.push({
+                        ...selectedContracts[index],
+                        start_date: startDate,
+                        end_date: endDate,
+                        bar_size: barSize
+                    });
+                }
+            });
+            if (contracts.length === 0) {
+                alert('No valid contracts to download');
+                return;
+            }
+            const response = await fetch('/download', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ contracts })
+            });
+            const result = await response.json();
+            activeJobs = result.jobs;
+            updateProgress();
+            startPolling();
+            bootstrap.Modal.getInstance(document.getElementById('downloadModal')).hide();
+        });
+
+        function updateProgress() {
+            const area = document.getElementById('progressArea');
+            area.innerHTML = activeJobs.map(job => `
+                <div class="alert alert-info">
+                    <strong>${job.contract}</strong>: ${job.status || job.error}
+                    ${job.job_key ? `(Job: ${job.job_key})` : ''}
+                </div>
+            `).join('');
+        }
+
+        function startPolling() {
+            setInterval(async () => {
+                for (let job of activeJobs) {
+                    if (job.job_key && !job.error) {
+                        const response = await fetch(`/job_status/${job.job_key}`);
+                        const status = await response.json();
+                        job.status = status.details || status.status;
+                    }
+                }
+                updateProgress();
+            }, 5000);  // Poll every 5 seconds
+        }
+    </script>
+</body>
+</html>

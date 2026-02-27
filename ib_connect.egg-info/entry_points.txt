@@ -1,0 +1,3 @@
+[console_scripts]
+ib-download = ib_connect.skills.ib_download.ib_download:main
+ib-query = ib_connect.skills.ib_query.ib_query:main

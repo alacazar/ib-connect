@@ -1,0 +1,9 @@
+Metadata-Version: 2.4
+Name: ib_connect
+Version: 0.2.0
+Requires-Dist: ib_insync
+Requires-Dist: pandas
+Requires-Dist: psycopg2-binary
+Requires-Dist: watchdog
+Requires-Dist: flask
+Dynamic: requires-dist

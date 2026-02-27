@@ -1,0 +1,9 @@
+{
+  "host": "127.0.0.1",
+  "port": 5000,
+  "contracts_folder": "C:\\Users\\clawuser\\.openclaw\\shared\\data\\contracts\\",
+  "downloads_folder": "C:\\Users\\clawuser\\.openclaw\\shared\\data\\downloads\\",
+  "ib_host": "127.0.0.1",
+  "ib_port": 7497,
+  "ib_client_id": 1
+}

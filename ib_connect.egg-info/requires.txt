@@ -1,0 +1,5 @@
+ib_insync
+pandas
+psycopg2-binary
+watchdog
+flask
