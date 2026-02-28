@@ -14,6 +14,7 @@ import logging
 from datetime import datetime, timedelta
 import pytz
 import psutil
+import pandas as pd
 from ib_insync import IB, Contract, util
 from job_queue import JobQueue
 
@@ -147,36 +148,67 @@ def process_job(job_key, params):
 
         queue.update_status(job_key, 'processing', message=f"Starting download for conid {params['conid']}")
 
-        with IBConnection.connect(
-            host=config.get('ib_host', '127.0.0.1'),
-            port=config.get('ib_port', 7497),
-            clientId=config.get('ib_client_id', 1),
-            timeout=config.get('timeout', 4.0),
-            readonly=True
-        ) as ib:
-            progress_callback = lambda msg: queue.update_status(job_key, 'processing', message=msg)
-            result_path = download_data(
-                ib,
-                params['conid'],
-                params['start'],
-                params['end'],
-                params['bar_size'],
-                params.get('show', 'TRADES'),
-                output_dir,
-                config.get('max_retries', 3),
-                chunk_duration,
-                params.get('use_rth', False),
-                verbose=False,  # Can add verbose to params
-                progress_callback=progress_callback,
-                format=params.get('format', 1)
-            )
-            queue.update_status(job_key, 'processing', message=f"Saving data to CSV for conid {params['conid']}")
-            if result_path:
-                status, result_path, error_msg = 'completed', result_path, None
+        result_path = None
+        max_attempts = 3
+        for attempt in range(max_attempts):
+            try:
+                with IBConnection.connect(
+                    host=config.get('ib_host', '127.0.0.1'),
+                    port=config.get('ib_port', 7497),
+                    clientId=config.get('ib_client_id', 1),
+                    timeout=config.get('timeout', 4.0),
+                    readonly=True
+                ) as ib:
+                    progress_callback = lambda msg: queue.update_status(job_key, 'processing', message=msg)
+                    result_path = download_data(
+                        ib,
+                        params['conid'],
+                        params['start'],
+                        params['end'],
+                        params['bar_size'],
+                        params.get('show', 'TRADES'),
+                        output_dir,
+                        config.get('max_retries', 3),
+                        chunk_duration,
+                        params.get('use_rth', False),
+                        verbose=False,  # Can add verbose to params
+                        progress_callback=progress_callback,
+                        format=params.get('format', 1)
+                    )
+                break  # Success
+            except Exception as e:
+                if attempt < max_attempts - 1:
+                    queue.update_status(job_key, 'processing', message=f"Attempt {attempt + 1} failed, retrying in 60s: {e}")
+                    time.sleep(60)
+                else:
+                    raise e
+
+        queue.update_status(job_key, 'processing', message=f"Saving data to CSV for conid {params['conid']}")
+        if result_path:
+            # Check data coverage
+            try:
+                import pandas as pd
+                df = pd.read_csv(result_path)
+                if not df.empty:
+                    df['date'] = pd.to_datetime(df['date'])
+                    earliest = df['date'].min().date()
+                    latest = df['date'].max().date()
+                    requested_start = datetime.strptime(params['start'], '%Y-%m-%d').date()
+                    requested_end = datetime.strptime(params['end'], '%Y-%m-%d').date()
+                    if earliest > requested_start or latest < requested_end:
+                        logging.warning(f"Partial data for job {job_key}: requested {requested_start} to {requested_end}, got {earliest} to {latest}")
+                        message = f"Download completed (partial): {os.path.basename(result_path)} - data from {earliest} to {latest}"
+                    else:
+                        message = f"Download completed: {os.path.basename(result_path)}"
+                else:
+                    message = "Download completed: No data found"
+            except Exception as check_e:
+                logging.error(f"Data check failed for job {job_key}: {check_e}")
                 message = f"Download completed: {os.path.basename(result_path)}"
-            else:
-                status, result_path, error_msg = 'completed', None, 'No data found'
-                message = "Download completed: No data found"
+            status, error_msg = 'completed', None
+        else:
+            status, result_path, error_msg = 'completed', None, 'No data found'
+            message = "Download completed: No data found"
     except Exception as e:
         logging.error(f"Job {job_key} failed with exception: {type(e).__name__}: {e}", exc_info=True)
         error_msg = f"{type(e).__name__}: {str(e) or 'No message'}"

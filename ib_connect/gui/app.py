@@ -9,6 +9,7 @@ import json
 import os
 import sys
 import asyncio
+import logging
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime
 
@@ -17,6 +18,7 @@ from ib_connect.skills.ib_query.query import query_ib
 from ib_connect.skills.ib_download.job_queue import JobQueue
 
 app = Flask(__name__)
+logging.getLogger('werkzeug').setLevel(logging.ERROR)
 
 # Config
 CONFIG_FILE = 'config.json'
