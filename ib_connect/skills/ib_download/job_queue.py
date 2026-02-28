@@ -82,3 +82,7 @@ class JobQueue:
                     'message': message
                 }
         return {'status': 'not_found'}
+
+    def remove_job(self, job_key):
+        with sqlite3.connect(self.db_path) as conn:
+            conn.execute('DELETE FROM jobs WHERE job_key = ?', (job_key,))

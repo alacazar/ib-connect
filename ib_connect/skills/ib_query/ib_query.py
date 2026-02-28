@@ -22,7 +22,7 @@ def main():
     parser.add_argument('-e', '--exchange', default='SMART', help='Exchange')
     parser.add_argument('-c', '--currency', default='USD', help='Currency')
     parser.add_argument('-x', '--expiry', help='Expiry date (YYYYMMDD)')
-    parser.add_argument('-k', '--strike', type=float, help='Strike price (for options)')
+    parser.add_argument('-k', '--strike', help='Strike price(s) (for options): single, comma-separated, or range e.g. 100-150')
     parser.add_argument('-r', '--right', choices=['PUT', 'CALL'], help='Option right')
     parser.add_argument('-I', '--include-expired', action='store_true', help='Include expired contracts')
     parser.add_argument('-H', '--host', default='127.0.0.1', help='IB host')

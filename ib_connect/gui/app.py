@@ -46,6 +46,10 @@ def index():
 @app.route('/query', methods=['POST'])
 def query_contracts():
     data = request.json
+    # Include configured IB params to avoid conflicts
+    data['host'] = config.get('ib_host', '127.0.0.1')
+    data['port'] = config.get('ib_port', 7497)
+    data['client_id'] = config.get('ib_client_id', 1)
     def run_query():
         return asyncio.run(query_ib(data))
 
@@ -55,7 +59,9 @@ def query_contracts():
             result = future.result()
         if isinstance(result, dict) and 'error' in result:
             return jsonify({'success': False, 'error': result['error']})
-        return jsonify({'success': True, 'contracts': result if isinstance(result, list) else [result]})
+        contracts = result if isinstance(result, list) else [result] if result else []
+        contracts = [c for c in contracts if c is not None]  # Filter out nulls
+        return jsonify({'success': True, 'contracts': contracts})
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)})
 
@@ -90,8 +96,8 @@ def save_contracts():
 def download_data():
     data = request.json
     contracts = data.get('contracts', [])
-    downloads_folder = config['downloads_folder']
-    job_queue_db = config['job_queue_db']
+    downloads_folder = config.get('downloads_folder', r'C:\Users\clawuser\.openclaw\shared\data\downloads')
+    job_queue_db = config.get('job_queue_db', r'C:\Users\clawuser\.openclaw\shared\services\ib_download_service\jobs.db')
     queue = JobQueue(job_queue_db)
     jobs = []
     for contract in contracts:
@@ -100,7 +106,6 @@ def download_data():
             'start': contract['start_date'],
             'end': contract['end_date'],
             'bar_size': contract['bar_size'],
-            'output_dir': downloads_folder,
             'agent': 'system_developer',
             'msg': f"Download {contract['symbol']} data"
         }
@@ -127,6 +132,20 @@ def job_status(job_key):
         return jsonify({'status': 'ok', 'details': details})
     except Exception as e:
         return jsonify({'status': 'error', 'details': str(e)})
+
+@app.route('/cancel_job/<job_key>', methods=['POST'])
+def cancel_job(job_key):
+    try:
+        job_queue_db = config['job_queue_db']
+        queue = JobQueue(job_queue_db)
+        status_data = queue.get_status(job_key)
+        if status_data['status'] == 'pending':
+            queue.remove_job(job_key)
+            return jsonify({'success': True})
+        else:
+            return jsonify({'success': False, 'error': 'Job not pending'})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)})
 
 if __name__ == '__main__':
     app.run(debug=True, host=config.get('host', '127.0.0.1'), port=config.get('port', 5000))

@@ -9,21 +9,21 @@
     <div class="container-fluid">
         <div class="row">
             <!-- Left Panel: Contract Search -->
-            <div class="col-2">
+            <div class="col-2" style="font-size: 12px;">
                 <h4>Contract Search</h4>
                 <form id="queryForm">
-                    <div class="mb-3">
+                    <div class="mb-2">
                         <label>Symbol</label>
-                        <input type="text" class="form-control" name="symbol" placeholder="Required if ConId not provided">
+                        <input type="text" class="form-control form-control-sm" name="symbol" placeholder="Required if ConId not provided" oninput="this.value = this.value.toUpperCase()">
                     </div>
-                    <button type="submit" class="btn btn-primary mb-3">Query</button>
-                    <div class="mb-3">
+                    <button type="submit" class="btn btn-primary btn-sm mb-2" style="width: 100%;">Query</button>
+                    <div class="mb-2">
                         <label>ConId</label>
-                        <input type="number" class="form-control" name="conid" placeholder="Required if Symbol not provided">
+                        <input type="number" class="form-control form-control-sm" name="conid" placeholder="Required if Symbol not provided">
                     </div>
-                    <div class="mb-3">
+                    <div class="mb-2">
                         <label>Security Type *</label>
-                        <select class="form-control" name="sec_type">
+                        <select class="form-control form-control-sm" name="sec_type" onchange="toggleFields()">
                             <option value="STK">STK</option>
                             <option value="FUT">FUT</option>
                             <option value="OPT">OPT</option>
@@ -36,31 +36,31 @@
                             <option value="CMDTY">CMDTY</option>
                         </select>
                     </div>
-                    <div class="mb-3">
+                    <div class="mb-2">
                         <label>Exchange</label>
-                        <input type="text" class="form-control" name="exchange" value="SMART">
+                        <input type="text" class="form-control form-control-sm" name="exchange" value="SMART" oninput="this.value = this.value.toUpperCase()">
                     </div>
-                    <div class="mb-3">
+                    <div class="mb-2">
                         <label>Currency</label>
-                        <input type="text" class="form-control" name="currency" value="USD">
+                        <input type="text" class="form-control form-control-sm" name="currency" value="USD">
                     </div>
-                    <div class="mb-3">
+                    <div class="mb-2">
                         <label>Expiry (YYYYMMDD)</label>
-                        <input type="text" class="form-control" name="expiry">
+                        <input type="text" class="form-control form-control-sm" name="expiry" id="expiryField" disabled>
                     </div>
-                    <div class="mb-3">
+                    <div class="mb-2">
                         <label>Strike</label>
-                        <input type="number" step="0.01" class="form-control" name="strike">
+                        <input type="text" class="form-control form-control-sm" name="strike" id="strikeField" placeholder="Optional" disabled>
                     </div>
-                    <div class="mb-3">
+                    <div class="mb-2">
                         <label>Right</label>
-                        <select class="form-control" name="right">
+                        <select class="form-control form-control-sm" name="right" id="rightField" disabled>
                             <option value="">None</option>
                             <option value="PUT">PUT</option>
                             <option value="CALL">CALL</option>
                         </select>
                     </div>
-                    <div class="form-check mb-3">
+                    <div class="form-check mb-2">
                         <input class="form-check-input" type="checkbox" name="include_expired">
                         <label class="form-check-label">Include Expired</label>
                     </div>
@@ -74,7 +74,7 @@
                 <button id="saveContracts" class="btn btn-success mb-2">Save Contracts</button>
                 <button id="downloadData" class="btn btn-warning mb-2">Download Data</button>
                 <div style="overflow-x: auto;">
-                <table id="resultsTable" class="table table-striped table-sm">
+                <table id="resultsTable" class="table table-striped table-sm" style="font-size: 12px;">
                     <thead>
                         <tr>
                             <th><input type="checkbox" id="selectAllCheckbox"></th>
@@ -112,8 +112,29 @@
                     <h5 class="modal-title">Download Data</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
-                <div class="modal-body" id="downloadList">
-                    <!-- Contracts will be added here -->
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label>Download Period</label>
+                        <div class="row">
+                            <div class="col-auto">
+                                <input type="number" class="form-control" id="periodNumber" value="1" min="1">
+                            </div>
+                            <div class="col-auto">
+                                <select class="form-control" id="periodUnit">
+                                    <option value="days">Days</option>
+                                    <option value="weeks">Weeks</option>
+                                    <option value="months">Months</option>
+                                    <option value="years">Years</option>
+                                </select>
+                            </div>
+                            <div class="col-auto">
+                                <button class="btn btn-secondary" id="setPeriod">Set</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="downloadList">
+                        <!-- Contracts will be added here -->
+                    </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
@@ -125,6 +146,15 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
+        function toggleFields() {
+            const secType = document.querySelector('select[name="sec_type"]').value;
+            const derivatives = ['FUT', 'OPT', 'FOP', 'IOPT', 'WAR'];
+            const options = ['OPT', 'FOP', 'IOPT', 'WAR'];
+            document.getElementById('expiryField').disabled = !derivatives.includes(secType);
+            document.getElementById('strikeField').disabled = !options.includes(secType);
+            document.getElementById('rightField').disabled = !options.includes(secType);
+        }
+        toggleFields(); // Initialize on load
         // Make table sortable
         document.querySelectorAll('#resultsTable th').forEach((th, index) => {
             th.style.cursor = 'pointer';
@@ -155,6 +185,8 @@
     <script>
         let selectedContracts = [];
         let activeJobs = [];
+        let jobDetails = {}; // job_key -> {contract, start_date, end_date, bar_size, submission_time, start_time, completion_time}
+        let expandedJobs = new Set(); // Set of expanded job_keys
 
         document.getElementById('queryForm').addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -254,34 +286,43 @@
             selectedContracts = contracts;  // Store for submission
             const list = document.getElementById('downloadList');
             list.innerHTML = '';
+            const today = new Date().toISOString().split('T')[0];
             contracts.forEach((contract, index) => {
                 const div = document.createElement('div');
-                div.className = 'mb-3 border p-2';
+                div.className = 'mb-3 border p-2 position-relative';
+                div.style.fontSize = '12px';
                 div.dataset.conid = contract.conid;
+                const expiry = contract.expiration_date;
+                const defaultEnd = expiry && expiry < today ? expiry : today;
                 div.innerHTML = `
+                    <button type="button" class="btn-close position-absolute top-0 end-0" style="font-size: 10px;" onclick="removeContract(${index})"></button>
                     <h6>${contract.symbol} (${contract.local_symbol || contract.symbol})</h6>
-                    <div class="row mb-2">
-                        <div class="col-auto">
-                            <button class="btn btn-secondary btn-sm copyAbove" onclick="copyAbove(this)">Copy Above</button>
-                        </div>
-                        <div class="col-auto ms-auto">
-                            <button class="btn btn-danger btn-sm" onclick="removeContract(${index})">Remove</button>
-                        </div>
-                    </div>
                     <div class="row">
                         <div class="col">
-                            <label>Start Date</label>
-                            <input type="date" class="form-control startDate" required>
+                            <label>Period</label>
+                            <div class="row">
+                                <div class="col">
+                                    <input type="number" class="form-control form-control-sm periodNumber" value="1" min="1">
+                                </div>
+                                <div class="col">
+                                    <select class="form-control form-control-sm periodUnit">
+                                        <option value="days">Days</option>
+                                        <option value="weeks">Weeks</option>
+                                        <option value="months">Months</option>
+                                        <option value="years" selected>Years</option>
+                                    </select>
+                                </div>
+                            </div>
                         </div>
                         <div class="col">
                             <label>End Date</label>
-                            <input type="date" class="form-control endDate" value="${contract.expiration_date || ''}" required>
+                            <input type="date" class="form-control form-control-sm endDate" value="${defaultEnd}" required>
                         </div>
                         <div class="col">
                             <label>Bar Size</label>
-                            <select class="form-control barSize">
+                            <select class="form-control form-control-sm barSize">
                                 <option value="1 min">1 min</option>
-                                <option value="1 day">1 day</option>
+                                <option value="1 day" selected>1 day</option>
                             </select>
                         </div>
                     </div>
@@ -298,38 +339,75 @@
             div.remove();
         }
 
-        function copyAbove(button) {
-            const currentDiv = button.closest('.mb-3');
-            const allDivs = document.querySelectorAll('#downloadList .mb-3');
-            const index = Array.from(allDivs).indexOf(currentDiv);
-            if (index > 0) {
-                const aboveDiv = allDivs[index - 1];
-                const aboveStart = aboveDiv.querySelector('.startDate').value;
-                const aboveEnd = aboveDiv.querySelector('.endDate').value;
-                const aboveBar = aboveDiv.querySelector('.barSize').value;
-                currentDiv.querySelector('.startDate').value = aboveStart;
-                currentDiv.querySelector('.endDate').value = aboveEnd;
-                currentDiv.querySelector('.barSize').value = aboveBar;
+        document.getElementById('setPeriod').addEventListener('click', () => {
+            const periodNumber = document.getElementById('periodNumber').value;
+            const periodUnit = document.getElementById('periodUnit').value;
+            document.querySelectorAll('#downloadList .mb-3').forEach(div => {
+                div.querySelector('.periodNumber').value = periodNumber;
+                div.querySelector('.periodUnit').value = periodUnit;
+            });
+        });
+
+        function toggleExpand(jobKey) {
+            if (expandedJobs.has(jobKey)) {
+                expandedJobs.delete(jobKey);
+            } else {
+                expandedJobs.add(jobKey);
             }
+            updateProgress(); // Re-render to update state
         }
 
         document.getElementById('startDownload').addEventListener('click', async () => {
             const contracts = [];
+            const today = new Date().toISOString().split('T')[0];
+            let hasError = false;
             document.querySelectorAll('#downloadList .mb-3').forEach((div, index) => {
-                const startDate = div.querySelector('.startDate').value;
                 const endDate = div.querySelector('.endDate').value;
                 const barSize = div.querySelector('.barSize').value;
-                if (startDate && endDate) {
-                    contracts.push({
-                        ...selectedContracts[index],
-                        start_date: startDate,
-                        end_date: endDate,
-                        bar_size: barSize
-                    });
+                const periodNumber = parseInt(div.querySelector('.periodNumber').value);
+                const periodUnit = div.querySelector('.periodUnit').value;
+                if (!endDate || !barSize || !periodNumber || !periodUnit) {
+                    alert('All fields must be filled');
+                    hasError = true;
+                    return;
                 }
+                if (endDate > today) {
+                    alert('End date cannot be in the future');
+                    hasError = true;
+                    return;
+                }
+                const expiry = selectedContracts[index].expiration_date;
+                if (expiry && endDate > expiry) {
+                    alert('End date cannot be after expiry date');
+                    hasError = true;
+                    return;
+                }
+                // Calculate start date
+                const end = new Date(endDate);
+                const start = new Date(end);
+                if (periodUnit === 'days') {
+                    start.setDate(end.getDate() - periodNumber);
+                } else if (periodUnit === 'weeks') {
+                    start.setDate(end.getDate() - periodNumber * 7);
+                } else if (periodUnit === 'months') {
+                    start.setMonth(end.getMonth() - periodNumber);
+                } else if (periodUnit === 'years') {
+                    start.setFullYear(end.getFullYear() - periodNumber);
+                }
+                const startDate = start.toISOString().split('T')[0];
+                if (startDate >= endDate) {
+                    alert('Calculated start date must be before end date');
+                    hasError = true;
+                    return;
+                }
+                contracts.push({
+                    ...selectedContracts[index],
+                    start_date: startDate,
+                    end_date: endDate,
+                    bar_size: barSize
+                });
             });
-            if (contracts.length === 0) {
-                alert('No valid contracts to download');
+            if (hasError || contracts.length === 0) {
                 return;
             }
             const response = await fetch('/download', {
@@ -338,7 +416,19 @@
                 body: JSON.stringify({ contracts })
             });
             const result = await response.json();
-            activeJobs = result.jobs;
+            activeJobs.push(...result.jobs);
+            // Store details for each job
+            result.jobs.forEach((job, index) => {
+                jobDetails[job.job_key] = {
+                    contract: contracts[index],
+                    start_date: contracts[index].start_date,
+                    end_date: contracts[index].end_date,
+                    bar_size: contracts[index].bar_size,
+                    submission_time: new Date().toLocaleString([], {year:'numeric', month:'2-digit', day:'2-digit', hour:'2-digit', minute:'2-digit'}),
+                    start_time: null,
+                    completion_time: null
+                };
+            });
             updateProgress();
             startPolling();
             alert('Download jobs submitted: ' + result.jobs.length + ' jobs');
@@ -347,7 +437,11 @@
 
         function updateProgress() {
             const area = document.getElementById('progressArea');
-            area.innerHTML = activeJobs.map(job => {
+            let html = '';
+            if (activeJobs.length > 0) {
+                html += '<button class="btn btn-secondary btn-sm mb-2" onclick="closeCompleted()">Close Completed</button>';
+            }
+            html += activeJobs.map(job => {
                 let alertClass = 'alert-info';
                 const details = job.status || job.error || '';
                 if (details.includes('processing')) {
@@ -357,13 +451,63 @@
                 } else if (details.includes('failed') || details.includes('error')) {
                     alertClass = 'alert-danger';
                 }
+                const jobDetail = jobDetails[job.job_key] || {};
+                const localSymbol = jobDetail.contract ? (jobDetail.contract.local_symbol || jobDetail.contract.symbol) : job.contract;
+                const statusMsg = details.split(' - ')[0].replace('Status: ', ''); // Show only status part
+                const isExpanded = expandedJobs.has(job.job_key);
                 return `
-                    <div class="alert ${alertClass}">
-                        <strong>${job.contract}</strong>: ${details}
-                        ${job.job_key ? `(Job: ${job.job_key})` : ''}
+                    <div class="alert ${alertClass} position-relative">
+                        <button type="button" class="btn-close position-absolute top-0 end-0" style="font-size: 10px;" onclick="closeJob('${job.job_key}')"></button>
+                        <strong>${localSymbol}</strong><br>
+                        <small>${statusMsg}</small>
+                        <span class="position-absolute bottom-0 end-0 mb-1 me-1" style="cursor: pointer; font-size: 14px; color: #6c757d;" onclick="toggleExpand('${job.job_key}')">
+                            ${isExpanded ? '▲' : '▼'}
+                        </span>
+                        <div class="collapse ${isExpanded ? 'show' : ''} mt-2" id="details-${job.job_key}">
+                            <div style="font-size: 11px;">
+                                <div style="display: table;">
+                                    <div style="display: table-row;"><div style="display: table-cell; padding-right: 10px; font-weight: bold;">Job ID</div><div style="display: table-cell;">${job.job_key}</div></div>
+                                    <div style="display: table-row;"><div style="display: table-cell; padding-right: 10px; font-weight: bold;">Bar Size</div><div style="display: table-cell;">${jobDetail.bar_size || 'N/A'}</div></div>
+                                    <div style="display: table-row;"><div style="display: table-cell; padding-right: 10px; font-weight: bold;">Period</div><div style="display: table-cell;">${jobDetail.start_date || 'N/A'} to ${jobDetail.end_date || 'N/A'}</div></div>
+                                    <div style="display: table-row;"><div style="display: table-cell; padding-right: 10px; font-weight: bold;">Submitted</div><div style="display: table-cell;">${jobDetail.submission_time || 'N/A'}</div></div>
+                                    <div style="display: table-row;"><div style="display: table-cell; padding-right: 10px; font-weight: bold;">Started</div><div style="display: table-cell;">${jobDetail.start_time || 'N/A'}</div></div>
+                                    <div style="display: table-row;"><div style="display: table-cell; padding-right: 10px; font-weight: bold;">Completed</div><div style="display: table-cell;">${jobDetail.completion_time || 'N/A'}</div></div>
+                                    <div style="display: table-row;"><div style="display: table-cell; padding-right: 10px; font-weight: bold;">Message</div><div style="display: table-cell;">${details}</div></div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 `;
             }).join('');
+            area.innerHTML = html;
+        }
+
+        function closeJob(jobKey) {
+            const job = activeJobs.find(j => j.job_key === jobKey);
+            if (!job) return;
+            if (job.status && job.status.includes('processing')) {
+                alert('Cannot close processing job');
+                return;
+            }
+            // If pending, cancel in backend
+            if (job.status && job.status.includes('pending')) {
+                fetch(`/cancel_job/${jobKey}`, {method: 'POST'});
+            }
+            // Remove from activeJobs
+            activeJobs = activeJobs.filter(j => j.job_key !== jobKey);
+            delete jobDetails[jobKey];
+            updateProgress();
+        }
+
+        function closeCompleted() {
+            activeJobs = activeJobs.filter(job => {
+                if (job.status && job.status.includes('completed')) {
+                    delete jobDetails[job.job_key];
+                    return false;
+                }
+                return true;
+            });
+            updateProgress();
         }
 
         function startPolling() {
@@ -372,7 +516,18 @@
                     if (job.job_key && !job.error) {
                         const response = await fetch(`/job_status/${job.job_key}`);
                         const status = await response.json();
+                        const prevStatus = job.status;
                         job.status = status.details || status.status;
+                        // Update times
+                        const details = jobDetails[job.job_key];
+                        if (details) {
+                            if (job.status.includes('processing') && !details.start_time) {
+                                details.start_time = new Date().toLocaleString([], {year:'numeric', month:'2-digit', day:'2-digit', hour:'2-digit', minute:'2-digit'});
+                            }
+                            if ((job.status.includes('completed') || job.status.includes('failed')) && !details.completion_time) {
+                                details.completion_time = new Date().toLocaleString([], {year:'numeric', month:'2-digit', day:'2-digit', hour:'2-digit', minute:'2-digit'});
+                            }
+                        }
                     }
                 }
                 updateProgress();
