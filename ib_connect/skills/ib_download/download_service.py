@@ -193,7 +193,7 @@ def process_job(job_key, params):
                 import pandas as pd
                 df = pd.read_csv(result_path)
                 if not df.empty:
-                    df['date'] = pd.to_datetime(df['date'])
+                    df['date'] = pd.to_datetime(df['date'], utc=True)
                     earliest = df['date'].min().date()
                     latest = df['date'].max().date()
                     requested_start = datetime.strptime(params['start'], '%Y-%m-%d').date()
