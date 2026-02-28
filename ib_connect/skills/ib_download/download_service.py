@@ -88,8 +88,7 @@ def download_data(ib, conid, start, end, bar_size, show, output_dir, max_retries
                     chunk_count += 1
                     if progress_callback:
                         progress_callback(f"Downloaded chunk {chunk_count}")
-                    if verbose:
-                        print(f"  + {len(bars)} bars (to {bars[0].date})")
+                    logging.info(f"Downloaded chunk {chunk_count} with {len(bars)} bars to {bars[0].date}")
                     # bars[0].date is naive datetime in exchange tz, localize to contract tz
                     if isinstance(bars[0].date, datetime):
                         naive_date = bars[0].date.replace(tzinfo=None) if bars[0].date.tzinfo else bars[0].date
@@ -105,8 +104,7 @@ def download_data(ib, conid, start, end, bar_size, show, output_dir, max_retries
                     end_dt = None
                     break
             except Exception as e:
-                if verbose:
-                    print(f"  Retry {attempt+1}: {e}")
+                logging.warning(f"Chunk attempt {attempt+1} failed: {e}")
                 time.sleep(30)
                 if attempt == max_retries - 1:
                     raise e
