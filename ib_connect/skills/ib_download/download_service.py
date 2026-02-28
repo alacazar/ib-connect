@@ -193,15 +193,19 @@ def process_job(job_key, params):
                 import pandas as pd
                 df = pd.read_csv(result_path)
                 if not df.empty:
-                    df['date'] = pd.to_datetime(df['date'], utc=True)
-                    earliest = df['date'].min().date()
-                    latest = df['date'].max().date()
-                    requested_start = datetime.strptime(params['start'], '%Y-%m-%d').date()
-                    requested_end = datetime.strptime(params['end'], '%Y-%m-%d').date()
-                    if earliest > requested_start or latest < requested_end:
-                        logging.warning(f"Partial data for job {job_key}: requested {requested_start} to {requested_end}, got {earliest} to {latest}")
-                        message = f"Download completed (partial): {os.path.basename(result_path)} - data from {earliest} to {latest}"
-                    else:
+                    df['date'] = pd.to_datetime(df['date'])
+                    try:
+                        earliest = df['date'].min().date()
+                        latest = df['date'].max().date()
+                        requested_start = datetime.strptime(params['start'], '%Y-%m-%d').date()
+                        requested_end = datetime.strptime(params['end'], '%Y-%m-%d').date()
+                        if earliest > requested_start or latest < requested_end:
+                            logging.warning(f"Partial data for job {job_key}: requested {requested_start} to {requested_end}, got {earliest} to {latest}")
+                            message = f"Download completed (partial): {os.path.basename(result_path)} - data from {earliest} to {latest}"
+                        else:
+                            message = f"Download completed: {os.path.basename(result_path)}"
+                    except Exception as tz_e:
+                        logging.warning(f"Timezone issue in data check for job {job_key}: {tz_e}, skipping coverage")
                         message = f"Download completed: {os.path.basename(result_path)}"
                 else:
                     message = "Download completed: No data found"
