@@ -151,6 +151,7 @@ def process_job(job_key, params):
         result_path = None
         max_attempts = 3
         for attempt in range(max_attempts):
+            logging.info(f"Job {job_key} starting attempt {attempt + 1}")
             try:
                 with IBConnection.connect(
                     host=config.get('ib_host', '127.0.0.1'),
@@ -159,7 +160,9 @@ def process_job(job_key, params):
                     timeout=config.get('timeout', 4.0),
                     readonly=True
                 ) as ib:
-                    progress_callback = lambda msg: queue.update_status(job_key, 'processing', message=msg)
+                    def progress_callback(msg):
+                        logging.info(f"Job {job_key} progress: {msg}")
+                        queue.update_status(job_key, 'processing', message=msg)
                     result_path = download_data(
                         ib,
                         params['conid'],
