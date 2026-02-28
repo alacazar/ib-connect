@@ -155,7 +155,7 @@ def process_job(job_key, params):
                 with IBConnection.connect(
                     host=config.get('ib_host', '127.0.0.1'),
                     port=config.get('ib_port', 7497),
-                    clientId=config.get('ib_client_id', 1),
+                    clientId=params.get('client_id', config.get('ib_client_id', 1)),
                     timeout=config.get('timeout', 4.0),
                     readonly=True
                 ) as ib:
