@@ -81,7 +81,7 @@ def download_data(ib, conid, start, end, bar_size, show, output_dir, max_retries
                     whatToShow=show,
                     useRTH=use_rth,
                     formatDate=1,
-                    timeout=30
+                    timeout=60
                 )
                 if bars:
                     all_bars.extend(bars)
