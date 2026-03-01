@@ -72,6 +72,8 @@ body {
 #resultsTable thead th {
   background: #808080 !important;
   color: #fff !important;
+  font-size: 12px !important;
+  font-weight: normal !important;
   border-bottom: 2px solid #444 !important;
   text-shadow: none !important;
   box-shadow: none !important;
