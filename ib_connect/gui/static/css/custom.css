@@ -86,12 +86,12 @@ select option:hover {
 
 /* Status colors matching UI elements */
 .alert-info {
-  background: #808080 !important; /* Query button color */
+  background: #909090 !important; /* Slightly brighter pending */
   color: #ffffff !important;
-  border: 1px solid #606060 !important;
+  border: 1px solid #707070 !important;
 }
 .alert-warning {
-  background: #adb5bd !important; /* Enabled text box background */
+  background: #9ca3a7 !important; /* Slightly darker processing */
   color: #ffffff !important;
   border: 1px solid #6c757d !important;
 }
