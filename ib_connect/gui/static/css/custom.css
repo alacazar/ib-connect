@@ -1,12 +1,13 @@
 /* Custom styles for ib_connect modernization */
 
-/* Lighter background */
+/* Charcoal background */
 body {
-  background-color: #ffffff !important;
+  background-color: #36454f !important;
+  color: #e9ecef !important;
   font-size: 12px;
 }
 .container-fluid {
-  background-color: #f8f9fa !important;
+  background-color: rgba(54, 69, 79, 0.9) !important;
   font-size: 12px;
 }
 .form-control, .btn {
