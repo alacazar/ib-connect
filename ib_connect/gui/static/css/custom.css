@@ -16,7 +16,7 @@ body {
 
 /* Blue background for all text boxes with light text */
 .form-control {
-  background: rgba(70, 90, 126, 0.4) !important;
+  background: rgba(70, 90, 126, 0.5) !important;
   color: #ffffff !important;
 }
 
