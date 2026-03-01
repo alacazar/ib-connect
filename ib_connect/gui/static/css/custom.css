@@ -67,7 +67,8 @@ body {
 }
 
 /* Metallic row hover */
-#resultsTable tbody tr:hover {
+#resultsTable tbody tr:hover,
+#resultsTable tbody tr:hover > td {
   background: linear-gradient(to bottom, #c0c0c0, #606060) !important;
   color: #fff !important;
 }
