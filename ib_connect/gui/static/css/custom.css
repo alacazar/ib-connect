@@ -66,11 +66,11 @@ body {
   box-shadow: none !important;
 }
 
-/* Grid backgrounds bright solid colors */
-#resultsTable tbody tr {
+/* Grid backgrounds bright solid colors with higher specificity */
+#resultsTable.table-striped tbody tr:nth-of-type(odd) {
   background: #f0f0f0 !important;
 }
-#resultsTable tbody tr:nth-child(even) {
+#resultsTable.table-striped tbody tr:nth-of-type(even) {
   background: #e0e0e0 !important;
 }
 
