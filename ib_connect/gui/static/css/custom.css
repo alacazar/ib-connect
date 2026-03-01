@@ -66,12 +66,12 @@ body {
   box-shadow: none !important;
 }
 
-/* Grid backgrounds brighter */
+/* Grid backgrounds bright solid colors */
 #resultsTable tbody tr {
-  background: rgba(255,255,255,0.15) !important;
+  background: #f0f0f0 !important;
 }
 #resultsTable tbody tr:nth-child(even) {
-  background: rgba(255,255,255,0.25) !important;
+  background: #e0e0e0 !important;
 }
 
 /* Grid text color */
