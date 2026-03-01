@@ -60,17 +60,22 @@ body {
 /* Flat metallic header */
 #resultsTable thead th {
   background: #808080 !important;
-  color: #fff !important;
+  color: #fafafa !important;
   border-bottom: 2px solid #444 !important;
-  text-shadow: none !important;
+  text-shadow: 0 0 2px rgba(255,255,255,0.3) !important;
   box-shadow: none !important;
+}
+
+/* Grid text color */
+#resultsTable tbody td {
+  color: #fafafa !important;
 }
 
 /* Flat row hover */
 #resultsTable tbody tr:hover,
 #resultsTable tbody tr:hover > td {
   background: #808080 !important;
-  color: #fff !important;
+  color: #fafafa !important;
 }
 
 /* Metallic dropdown highlight (may not work in all browsers) */
