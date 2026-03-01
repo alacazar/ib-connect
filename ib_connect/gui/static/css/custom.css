@@ -62,19 +62,19 @@ div[style*="overflow-x"] {
   overflow-x: hidden !important;
 }
 
-/* Metallic buttons */
+/* Metallic buttons - darker */
 .btn {
-  background: linear-gradient(to bottom, #e0e0e0, #a0a0a0) !important;
-  border: 1px solid #888 !important;
-  color: #333 !important;
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.4), 0 2px 4px rgba(0,0,0,0.2) !important;
-  text-shadow: 0 1px 0 rgba(255,255,255,0.3) !important;
+  background: linear-gradient(to bottom, #c0c0c0, #606060) !important;
+  border: 1px solid #444 !important;
+  color: #fff !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.2), 0 2px 4px rgba(0,0,0,0.3) !important;
+  text-shadow: 0 1px 1px rgba(0,0,0,0.5) !important;
 }
 .btn:hover {
-  background: linear-gradient(to bottom, #f0f0f0, #b0b0b0) !important;
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.6), 0 3px 6px rgba(0,0,0,0.3) !important;
+  background: linear-gradient(to bottom, #d0d0d0, #707070) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.4), 0 3px 6px rgba(0,0,0,0.4) !important;
 }
 .btn:active {
-  background: linear-gradient(to bottom, #c0c0c0, #808080) !important;
-  box-shadow: inset 0 2px 4px rgba(0,0,0,0.2) !important;
+  background: linear-gradient(to bottom, #a0a0a0, #404040) !important;
+  box-shadow: inset 0 2px 4px rgba(0,0,0,0.3) !important;
 }
