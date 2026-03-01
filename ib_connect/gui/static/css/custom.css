@@ -84,24 +84,24 @@ select option:hover {
   color: #fff !important;
 }
 
-/* Metallic status colors for download jobs */
+/* Status colors matching UI elements */
 .alert-info {
-  background: linear-gradient(to bottom, #c0c0c0, #606060) !important;
-  color: #fafafa !important;
-  border: 1px solid #444 !important;
+  background: #325f8b !important; /* Query button color */
+  color: #ffffff !important;
+  border: 1px solid #2c4f6b !important;
 }
 .alert-warning {
-  background: linear-gradient(to bottom, #cd7f32, #8b4513) !important;
-  color: #fafafa !important;
-  border: 1px solid #654321 !important;
+  background: #ffffff !important; /* Enabled symbol text box background */
+  color: #212529 !important;
+  border: 1px solid #ced4da !important;
 }
 .alert-success {
-  background: linear-gradient(to bottom, #b8860b, #8b6914) !important;
-  color: #fafafa !important;
-  border: 1px solid #8b6914 !important;
+  background: #e9ecef !important; /* Disabled expiry text box background */
+  color: #6c757d !important;
+  border: 1px solid #adb5bd !important;
 }
 .alert-danger {
-  background: linear-gradient(to bottom, #b87333, #a0522d) !important;
+  background: linear-gradient(to bottom, #b87333, #a0522d) !important; /* Keep metallic copper for errors */
   color: #fafafa !important;
   border: 1px solid #8b4513 !important;
 }
