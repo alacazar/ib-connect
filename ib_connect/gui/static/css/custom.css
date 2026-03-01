@@ -86,9 +86,9 @@ select option:hover {
 
 /* Status colors matching UI elements */
 .alert-info {
-  background: #325f8b !important; /* Query button color */
+  background: #fd7e14 !important; /* Query button color (Solar primary orange) */
   color: #ffffff !important;
-  border: 1px solid #2c4f6b !important;
+  border: 1px solid #e8680d !important;
 }
 .alert-warning {
   background: #ffffff !important; /* Enabled symbol text box background */
