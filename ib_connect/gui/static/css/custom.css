@@ -14,10 +14,18 @@ body {
   font-size: 12px;
 }
 
-/* Blue background for all text boxes with light text */
+/* Blue background for all text boxes and checkboxes with light text */
 .form-control {
   background: rgba(85, 105, 141, 0.4) !important;
   color: #ffffff !important;
+}
+.form-check-input {
+  background-color: rgba(85, 105, 141, 0.4) !important;
+  border-color: #ffffff !important;
+}
+.form-check-input:checked {
+  background-color: rgba(85, 105, 141, 0.4) !important;
+  border-color: #ffffff !important;
 }
 
 /* Disabled controls have muted text color */
