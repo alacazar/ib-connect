@@ -91,14 +91,14 @@ select option:hover {
   border: 1px solid #606060 !important;
 }
 .alert-warning {
-  background: #f8f9fa !important; /* Enabled text box background */
-  color: #212529 !important;
-  border: 1px solid #ced4da !important;
+  background: #adb5bd !important; /* Enabled text box background */
+  color: #ffffff !important;
+  border: 1px solid #6c757d !important;
 }
 .alert-success {
-  background: #e9ecef !important; /* Disabled text box background */
-  color: #6c757d !important;
-  border: 1px solid #adb5bd !important;
+  background: #839496 !important; /* Disabled text box background */
+  color: #ffffff !important;
+  border: 1px solid #6c757d !important;
 }
 .alert-danger {
   background: linear-gradient(to bottom, #b87333, #a0522d) !important; /* Keep metallic copper for errors */
