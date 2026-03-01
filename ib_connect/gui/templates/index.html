@@ -17,7 +17,7 @@
                         <label>Symbol</label>
                         <input type="text" class="form-control form-control-sm" name="symbol" placeholder="Required if ConId not provided" oninput="this.value = this.value.toUpperCase()">
                     </div>
-                    <button type="submit" class="btn btn-primary btn-sm mb-2" style="width: 100%;">Query</button>
+                    <button type="submit" class="btn btn-primary btn-sm mb-2" style="width: 100%; margin-top: 30px;">Query</button>
                     <div class="mb-2">
                         <label>ConId</label>
                         <input type="number" class="form-control form-control-sm" name="conid" placeholder="Required if Symbol not provided">
@@ -157,16 +157,8 @@
         }
         toggleFields(); // Initialize on load
 
-        // Align grid header with query button
-        window.addEventListener('load', () => {
-            const btn = document.querySelector('#queryForm button[type="submit"]');
-            const tableContainer = document.getElementById('tableContainer');
-            if (btn && tableContainer) {
-                const btnTop = btn.getBoundingClientRect().top;
-                const containerTop = tableContainer.getBoundingClientRect().top;
-                tableContainer.style.marginTop = (btnTop - containerTop) + 'px';
-            }
-        });
+        // Grid back to default position
+        // Removed alignment JS
 
         // Make table sortable
         document.querySelectorAll('#resultsTable th').forEach((th, index) => {
