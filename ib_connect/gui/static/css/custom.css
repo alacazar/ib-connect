@@ -96,7 +96,7 @@ select option:hover {
   border: 1px solid #654321 !important;
 }
 .alert-success {
-  background: linear-gradient(to bottom, #ffd700, #daa520) !important;
+  background: linear-gradient(to bottom, #daa520, #b8860b) !important;
   color: #fafafa !important;
   border: 1px solid #b8860b !important;
 }
