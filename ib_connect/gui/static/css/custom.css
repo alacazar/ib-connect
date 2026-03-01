@@ -79,6 +79,11 @@ select option:hover {
   color: #fff !important;
 }
 
+/* Align results panel with query button */
+#resultsPanel {
+  margin-top: 60px;
+}
+
 /* Remove horizontal scrollbar */
 div[style*="overflow-x"] {
   overflow-x: hidden !important;
