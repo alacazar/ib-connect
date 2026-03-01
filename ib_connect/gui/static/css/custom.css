@@ -84,6 +84,28 @@ select option:hover {
   color: #fff !important;
 }
 
+/* Metallic status colors for download jobs */
+.alert-info {
+  background: linear-gradient(to bottom, #c0c0c0, #606060) !important;
+  color: #fafafa !important;
+  border: 1px solid #444 !important;
+}
+.alert-warning {
+  background: linear-gradient(to bottom, #cd7f32, #8b4513) !important;
+  color: #fafafa !important;
+  border: 1px solid #654321 !important;
+}
+.alert-success {
+  background: linear-gradient(to bottom, #ffd700, #daa520) !important;
+  color: #fafafa !important;
+  border: 1px solid #b8860b !important;
+}
+.alert-danger {
+  background: linear-gradient(to bottom, #b87333, #a0522d) !important;
+  color: #fafafa !important;
+  border: 1px solid #8b4513 !important;
+}
+
 /* Alignment handled by JavaScript */
 
 /* Remove horizontal scrollbar */
