@@ -1,10 +1,12 @@
 /* Custom styles for ib_connect modernization */
 
-/* Reduce font sizes for better fit */
+/* Lighter background */
 body {
+  background-color: #ffffff !important;
   font-size: 12px;
 }
 .container-fluid {
+  background-color: #f8f9fa !important;
   font-size: 12px;
 }
 .form-control, .btn {
@@ -59,11 +61,19 @@ div[style*="overflow-x"] {
   overflow-x: hidden !important;
 }
 
-/* Make all buttons the same color */
-.btn-danger, .btn-success, .btn-warning {
-  background-color: var(--bs-primary) !important;
-  border-color: var(--bs-primary) !important;
+/* Metallic buttons */
+.btn {
+  background: linear-gradient(to bottom, #e0e0e0, #a0a0a0) !important;
+  border: 1px solid #888 !important;
+  color: #333 !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.4), 0 2px 4px rgba(0,0,0,0.2) !important;
+  text-shadow: 0 1px 0 rgba(255,255,255,0.3) !important;
 }
-.btn-danger:hover, .btn-success:hover, .btn-warning:hover {
-  background-color: var(--bs-primary-hover, #0056b3) !important;
+.btn:hover {
+  background: linear-gradient(to bottom, #f0f0f0, #b0b0b0) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.6), 0 3px 6px rgba(0,0,0,0.3) !important;
+}
+.btn:active {
+  background: linear-gradient(to bottom, #c0c0c0, #808080) !important;
+  box-shadow: inset 0 2px 4px rgba(0,0,0,0.2) !important;
 }
