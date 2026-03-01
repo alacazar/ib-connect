@@ -68,12 +68,12 @@ body {
   width: 5%;
 }
 
-/* Flat metallic header */
+/* Flat metallic header same as buttons */
 #resultsTable thead th {
   background: #808080 !important;
-  color: #fafafa !important;
+  color: #fff !important;
   border-bottom: 2px solid #444 !important;
-  text-shadow: 0 0 2px rgba(255,255,255,0.3) !important;
+  text-shadow: none !important;
   box-shadow: none !important;
 }
 
