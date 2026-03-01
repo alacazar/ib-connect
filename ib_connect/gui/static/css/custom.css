@@ -25,6 +25,7 @@ body {
 }
 .form-check-input:checked {
   background-color: rgba(85, 105, 141, 0.4) !important;
+  background-image: none !important;
   border-color: #ffffff !important;
 }
 
