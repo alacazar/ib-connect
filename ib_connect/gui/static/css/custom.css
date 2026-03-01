@@ -20,6 +20,11 @@ body {
   color: #ffffff !important;
 }
 
+/* Disabled controls have muted text color */
+.form-control:disabled {
+  color: #6c757d !important;
+}
+
 /* Grid font and layout */
 #resultsTable {
   font-size: 10px !important;
