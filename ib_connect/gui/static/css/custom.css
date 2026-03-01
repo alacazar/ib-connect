@@ -66,6 +66,18 @@ body {
   box-shadow: inset 0 1px 0 rgba(255,255,255,0.2) !important;
 }
 
+/* Metallic row hover */
+#resultsTable tbody tr:hover {
+  background: linear-gradient(to bottom, #c0c0c0, #606060) !important;
+  color: #fff !important;
+}
+
+/* Metallic dropdown highlight (may not work in all browsers) */
+select option:hover {
+  background: linear-gradient(to bottom, #c0c0c0, #606060) !important;
+  color: #fff !important;
+}
+
 /* Remove horizontal scrollbar */
 div[style*="overflow-x"] {
   overflow-x: hidden !important;
