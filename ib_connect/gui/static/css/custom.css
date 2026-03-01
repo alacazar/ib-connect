@@ -47,45 +47,10 @@ body {
 /* Grid font and layout */
 #resultsTable {
   font-size: 10px !important;
-  table-layout: fixed;
+  table-layout: auto;
   width: 100%;
 }
-#resultsTable th:nth-child(1), #resultsTable td:nth-child(1) {
-  width: 3%;
-}
-#resultsTable th:nth-child(2), #resultsTable td:nth-child(2) {
-  width: 10%;
-}
-#resultsTable th:nth-child(3), #resultsTable td:nth-child(3) {
-  width: 8%;
-}
-#resultsTable th:nth-child(4), #resultsTable td:nth-child(4) {
-  width: 10%;
-}
-#resultsTable th:nth-child(5), #resultsTable td:nth-child(5) {
-  width: 8%;
-}
-#resultsTable th:nth-child(6), #resultsTable td:nth-child(6) {
-  width: 8%;
-}
-#resultsTable th:nth-child(7), #resultsTable td:nth-child(7) {
-  width: 5%;
-}
-#resultsTable th:nth-child(8), #resultsTable td:nth-child(8) {
-  width: 8%;
-}
-#resultsTable th:nth-child(9), #resultsTable td:nth-child(9) {
-  width: 6%;
-}
-#resultsTable th:nth-child(10), #resultsTable td:nth-child(10) {
-  width: 5%;
-}
-#resultsTable th:nth-child(11), #resultsTable td:nth-child(11) {
-  width: 6%;
-}
-#resultsTable th:nth-child(12), #resultsTable td:nth-child(12) {
-  width: 5%;
-}
+
 
 /* Flat metallic header same as buttons */
 #resultsTable thead th {
