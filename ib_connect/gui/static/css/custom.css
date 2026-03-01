@@ -86,17 +86,17 @@ select option:hover {
 
 /* Status colors matching UI elements */
 .alert-info {
-  background: #fd7e14 !important; /* Query button color (Solar primary orange) */
+  background: #808080 !important; /* Query button color */
   color: #ffffff !important;
-  border: 1px solid #e8680d !important;
+  border: 1px solid #606060 !important;
 }
 .alert-warning {
-  background: #ffffff !important; /* Enabled symbol text box background */
+  background: #f8f9fa !important; /* Enabled text box background */
   color: #212529 !important;
   border: 1px solid #ced4da !important;
 }
 .alert-success {
-  background: #e9ecef !important; /* Disabled expiry text box background */
+  background: #e9ecef !important; /* Disabled text box background */
   color: #6c757d !important;
   border: 1px solid #adb5bd !important;
 }
