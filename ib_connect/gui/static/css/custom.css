@@ -79,9 +79,13 @@ select option:hover {
   color: #fff !important;
 }
 
-/* Align results panel with query button */
+/* Align results panel header with query button */
 #resultsPanel {
-  margin-top: 60px;
+  margin-top: 0;
+}
+#resultsPanel h4 {
+  margin-top: 15px;
+  margin-bottom: 5px;
 }
 
 /* Remove horizontal scrollbar */
