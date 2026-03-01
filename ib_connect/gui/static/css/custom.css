@@ -79,10 +79,7 @@ select option:hover {
   color: #fff !important;
 }
 
-/* Align grid header with query button */
-#tableContainer {
-  margin-top: 10px;
-}
+/* Alignment handled by JavaScript */
 
 /* Remove horizontal scrollbar */
 div[style*="overflow-x"] {

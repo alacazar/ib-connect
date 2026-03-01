@@ -156,6 +156,18 @@
             document.getElementById('rightField').disabled = !options.includes(secType);
         }
         toggleFields(); // Initialize on load
+
+        // Align grid header with query button
+        window.addEventListener('load', () => {
+            const btn = document.querySelector('#queryForm button[type="submit"]');
+            const tableContainer = document.getElementById('tableContainer');
+            if (btn && tableContainer) {
+                const btnTop = btn.getBoundingClientRect().top;
+                const containerTop = tableContainer.getBoundingClientRect().top;
+                tableContainer.style.marginTop = (btnTop - containerTop) + 'px';
+            }
+        });
+
         // Make table sortable
         document.querySelectorAll('#resultsTable th').forEach((th, index) => {
             th.style.cursor = 'pointer';
