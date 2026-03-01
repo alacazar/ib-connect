@@ -79,9 +79,9 @@ select option:hover {
   color: #fff !important;
 }
 
-/* Keep Results and buttons in place, move only the grid up */
+/* Align grid header with query button */
 #tableContainer {
-  margin-top: -45px;
+  margin-top: 10px;
 }
 
 /* Remove horizontal scrollbar */
