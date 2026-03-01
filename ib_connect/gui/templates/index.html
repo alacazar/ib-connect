@@ -151,9 +151,15 @@
             const secType = document.querySelector('select[name="sec_type"]').value;
             const derivatives = ['FUT', 'OPT', 'FOP', 'IOPT', 'WAR'];
             const options = ['OPT', 'FOP', 'IOPT', 'WAR'];
-            document.getElementById('expiryField').disabled = !derivatives.includes(secType);
-            document.getElementById('strikeField').disabled = !options.includes(secType);
-            document.getElementById('rightField').disabled = !options.includes(secType);
+            const expiryField = document.getElementById('expiryField');
+            const strikeField = document.getElementById('strikeField');
+            const rightField = document.getElementById('rightField');
+            expiryField.disabled = !derivatives.includes(secType);
+            if (expiryField.disabled) expiryField.value = '';
+            strikeField.disabled = !options.includes(secType);
+            if (strikeField.disabled) strikeField.value = '';
+            rightField.disabled = !options.includes(secType);
+            if (rightField.disabled) rightField.value = '';
         }
         toggleFields(); // Initialize on load
 
