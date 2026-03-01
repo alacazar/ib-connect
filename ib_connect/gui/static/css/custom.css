@@ -97,9 +97,15 @@ body {
   color: #fafafa !important;
 }
 
+/* Dropdown options background same as buttons */
+select option {
+  background: #808080 !important;
+  color: #fff !important;
+}
+
 /* Metallic dropdown highlight (may not work in all browsers) */
 select option:hover {
-  background: linear-gradient(to bottom, #c0c0c0, #606060) !important;
+  background: #909090 !important;
   color: #fff !important;
 }
 
