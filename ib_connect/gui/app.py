@@ -108,8 +108,8 @@ def download_data():
             'start': contract['start_date'],
             'end': contract['end_date'],
             'bar_size': contract['bar_size'],
-            'agent': 'system_developer',
-            'msg': f"Download {contract['symbol']} data"
+            'show': contract.get('show', 'TRADES'),
+            'msg': f"Download {contract['symbol']} data ({contract.get('show', 'TRADES')})"
         }
         try:
             job_key = queue.submit_job(params)

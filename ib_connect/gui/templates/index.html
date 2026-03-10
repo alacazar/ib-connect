@@ -114,8 +114,12 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
+                    <div class="d-flex justify-content-end mb-3">
+                        <button type="button" class="btn btn-secondary me-2" data-bs-dismiss="modal">Cancel</button>
+                        <button type="button" class="btn btn-primary" id="startDownloadTop">Download</button>
+                    </div>
                     <div class="mb-3">
-                        <label>Download Period</label>
+                        <label>Download Period, Bar Size & Data Type</label>
                         <div class="row">
                             <div class="col-auto">
                                 <input type="number" class="form-control" id="periodNumber" value="1" min="1">
@@ -126,6 +130,20 @@
                                     <option value="weeks">Weeks</option>
                                     <option value="months">Months</option>
                                     <option value="years">Years</option>
+                                </select>
+                            </div>
+                            <div class="col-auto">
+                                <select class="form-control" id="globalBarSize">
+                                    <option value="1 min" selected>1 min</option>
+                                    <option value="1 day">1 day</option>
+                                </select>
+                            </div>
+                            <div class="col-auto">
+                                <select class="form-control" id="globalShowType">
+                                    <option value="TRADES" selected>TRADES</option>
+                                    <option value="MIDPOINT">MIDPOINT</option>
+                                    <option value="BID">BID</option>
+                                    <option value="ASK">ASK</option>
                                 </select>
                             </div>
                             <div class="col-auto">
@@ -332,8 +350,17 @@
                         <div class="col">
                             <label>Bar Size</label>
                             <select class="form-control form-control-sm barSize">
-                                <option value="1 min">1 min</option>
-                                <option value="1 day" selected>1 day</option>
+                                <option value="1 min" selected>1 min</option>
+                                <option value="1 day">1 day</option>
+                            </select>
+                        </div>
+                        <div class="col">
+                            <label>Data Type</label>
+                            <select class="form-control form-control-sm showType">
+                                <option value="TRADES" selected>TRADES</option>
+                                <option value="MIDPOINT">MIDPOINT</option>
+                                <option value="BID">BID</option>
+                                <option value="ASK">ASK</option>
                             </select>
                         </div>
                     </div>
@@ -353,9 +380,13 @@
         document.getElementById('setPeriod').addEventListener('click', () => {
             const periodNumber = document.getElementById('periodNumber').value;
             const periodUnit = document.getElementById('periodUnit').value;
+            const globalBarSize = document.getElementById('globalBarSize').value;
+            const globalShowType = document.getElementById('globalShowType').value;
             document.querySelectorAll('#downloadList .mb-3').forEach(div => {
                 div.querySelector('.periodNumber').value = periodNumber;
                 div.querySelector('.periodUnit').value = periodUnit;
+                div.querySelector('.barSize').value = globalBarSize;
+                div.querySelector('.showType').value = globalShowType;
             });
         });
 
@@ -368,16 +399,17 @@
             updateProgress(); // Re-render to update state
         }
 
-        document.getElementById('startDownload').addEventListener('click', async () => {
+        const handleDownload = async () => {
             const contracts = [];
             const today = new Date().toISOString().split('T')[0];
             let hasError = false;
             document.querySelectorAll('#downloadList .mb-3').forEach((div, index) => {
                 const endDate = div.querySelector('.endDate').value;
                 const barSize = div.querySelector('.barSize').value;
+                const showType = div.querySelector('.showType').value;
                 const periodNumber = parseInt(div.querySelector('.periodNumber').value);
                 const periodUnit = div.querySelector('.periodUnit').value;
-                if (!endDate || !barSize || !periodNumber || !periodUnit) {
+                if (!endDate || !barSize || !showType || !periodNumber || !periodUnit) {
                     alert('All fields must be filled');
                     hasError = true;
                     return;
@@ -415,7 +447,8 @@
                     ...selectedContracts[index],
                     start_date: startDate,
                     end_date: endDate,
-                    bar_size: barSize
+                    bar_size: barSize,
+                    show: showType
                 });
             });
             if (hasError || contracts.length === 0) {
@@ -435,6 +468,7 @@
                     start_date: contracts[index].start_date,
                     end_date: contracts[index].end_date,
                     bar_size: contracts[index].bar_size,
+                    show: contracts[index].show,
                     submission_time: new Date().toLocaleString([], {year:'numeric', month:'2-digit', day:'2-digit', hour:'2-digit', minute:'2-digit'}),
                     start_time: null,
                     completion_time: null
@@ -444,7 +478,10 @@
             startPolling();
             alert('Download jobs submitted: ' + result.jobs.length + ' jobs');
             bootstrap.Modal.getInstance(document.getElementById('downloadModal')).hide();
-        });
+        };
+
+        document.getElementById('startDownload').addEventListener('click', handleDownload);
+        document.getElementById('startDownloadTop').addEventListener('click', handleDownload);
 
         function updateProgress() {
             const area = document.getElementById('progressArea');
@@ -479,6 +516,7 @@
                                 <div style="display: table;">
                                     <div style="display: table-row;"><div style="display: table-cell; padding-right: 10px; font-weight: bold;">Job ID</div><div style="display: table-cell;">${job.job_key}</div></div>
                                     <div style="display: table-row;"><div style="display: table-cell; padding-right: 10px; font-weight: bold;">Bar Size</div><div style="display: table-cell;">${jobDetail.bar_size || 'N/A'}</div></div>
+                                    <div style="display: table-row;"><div style="display: table-cell; padding-right: 10px; font-weight: bold;">Data Type</div><div style="display: table-cell;">${jobDetail.show || 'N/A'}</div></div>
                                     <div style="display: table-row;"><div style="display: table-cell; padding-right: 10px; font-weight: bold;">Period</div><div style="display: table-cell;">${jobDetail.start_date || 'N/A'} to ${jobDetail.end_date || 'N/A'}</div></div>
                                     <div style="display: table-row;"><div style="display: table-cell; padding-right: 10px; font-weight: bold;">Submitted</div><div style="display: table-cell;">${jobDetail.submission_time || 'N/A'}</div></div>
                                     <div style="display: table-row;"><div style="display: table-cell; padding-right: 10px; font-weight: bold;">Started</div><div style="display: table-cell;">${jobDetail.start_time || 'N/A'}</div></div>

@@ -115,17 +115,18 @@ def download_data(ib, conid, start, end, bar_size, show, output_dir, max_retries
         df = util.df(all_bars)
         df = df.rename(columns={'barCount': 'trades'}).sort_values('date').drop_duplicates()
         os.makedirs(output_dir, exist_ok=True)
-        # Format filename for data_upload: <localSymbol>.<conid>.<barsize>.<tz>.csv or .json (spaces in localSymbol replaced with _)
+        # Format filename for data_upload: <localSymbol>.<conid>.<barsize>.<tz>.<bar-type>.csv or .json (spaces in localSymbol replaced with _)
         bar_size_clean = bar_size.replace(' ', '').replace('min', 'min').replace('hour', 'hour').replace('day', 'day')
         local_symbol_clean = contract.localSymbol.replace(' ', '_')
+        bar_type = show.lower()
         if format == 'json':
-            filename = f"{local_symbol_clean}.{conid}.{bar_size_clean}.{tz_filename}.json"
+            filename = f"{local_symbol_clean}.{conid}.{bar_size_clean}.{tz_filename}.{bar_type}.json"
             filepath = os.path.join(output_dir, filename)
             if progress_callback:
                 progress_callback("Saving data to JSON")
             df.to_json(filepath, orient='records')
         else:
-            filename = f"{local_symbol_clean}.{conid}.{bar_size_clean}.{tz_filename}.csv"
+            filename = f"{local_symbol_clean}.{conid}.{bar_size_clean}.{tz_filename}.{bar_type}.csv"
             filepath = os.path.join(output_dir, filename)
             if progress_callback:
                 progress_callback("Saving data to CSV")

@@ -112,7 +112,7 @@ async def query_single(ib, contract, args):
         print(f"Querying details for: {contract}", file=sys.stderr)
 
     details = await ib.reqContractDetailsAsync(contract)
-    if not details:
+    if details is None or not details:
         return {"error": "No contract details found"}
     
     if hasattr(args, 'strike') and ',' in args.strike:
