@@ -23,7 +23,7 @@ logging.getLogger('werkzeug').setLevel(logging.ERROR)
 # Config
 CONFIG_FILE = 'config.json'
 DEFAULT_CONFIG = {
-    'contracts_folder': 'C:\\Users\\clawuser\\.openclaw\\shared\\data\\contracts\\',
+    'contracts_folder': './data/contracts',
     'ib_host': '127.0.0.1',
     'ib_port': 7497,
     'ib_client_id': 77
@@ -98,8 +98,8 @@ def save_contracts():
 def download_data():
     data = request.json
     contracts = data.get('contracts', [])
-    downloads_folder = config.get('downloads_folder', r'C:\Users\clawuser\.openclaw\shared\data\downloads')
-    job_queue_db = config.get('job_queue_db', r'C:\Users\clawuser\.openclaw\shared\services\ib_download_service\jobs.db')
+    downloads_folder = config.get('downloads_folder', './data/downloads')
+    job_queue_db = config.get('job_queue_db', './jobs.db')
     queue = JobQueue(job_queue_db)
     jobs = []
     for contract in contracts:

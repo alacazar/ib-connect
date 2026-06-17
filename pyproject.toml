@@ -1,0 +1,26 @@
+[build-system]
+requires = ["setuptools>=61", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ib_connect"
+version = "0.2.0"
+description = "Modular Interactive Brokers integration toolkit — query contracts, download historical data, and upload to TimescaleDB."
+readme = "README.md"
+license = {text = "MIT"}
+authors = [{name = "Mats Bengtsson", email = "mats.bengtsson@outlook.com"}]
+requires-python = ">=3.9"
+dependencies = [
+    "ib_insync",
+    "pandas",
+    "psycopg2-binary",
+    "watchdog",
+    "flask",
+]
+
+[project.scripts]
+ib-query = "ib_connect.skills.ib_query.ib_query:main"
+ib-download = "ib_connect.skills.ib_download.ib_download:main"
+
+[project.urls]
+Homepage = "https://github.com/alacazar/ib-connect"

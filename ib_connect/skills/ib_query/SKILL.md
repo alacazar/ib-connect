@@ -1,7 +1,7 @@
 ---
 name: ib-query
 description: Query Interactive Brokers for contract details using ib_insync. Provides CLI tool to connect, qualify, and retrieve contract info.
-location: C:\Users\clawuser\.openclaw\shared\projects\ib-connect\skills\ib-query\ib_query.py
+location: ib_connect/skills/ib_query/ib_query.py
 ---
 
 ## IB Query Skill

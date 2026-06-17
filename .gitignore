@@ -1,0 +1,24 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+*.egg
+
+# Runtime config (copy from *.example.json and customize)
+ib_connect/skills/ib_download/config.json
+ib_connect/gui/config.json
+
+# Databases
+*.db
+
+# Data files
+ib_connect/data/
+
+# IDE / editor
+.vscode/
+.claude/
+
+# Environment
+.env

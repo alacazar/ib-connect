@@ -1,7 +1,7 @@
 ---
 name: data-upload
 description: Monitors folder for JSON/CSV data files, validates, and uploads to PostgreSQL TimescaleDB.
-location: C:\Users\clawuser\.openclaw\shared\projects\ib-connect\skills\data-upload\data_upload.py
+location: ib_connect/skills/data_upload/data_upload.py
 ---
 
 ## Data Upload Skill

@@ -1,0 +1,7 @@
+{
+    "webhook_url": "http://localhost:18789/hooks/agent",
+    "token": "YOUR_WEBHOOK_TOKEN",
+    "db_path": "/path/to/jobs.db",
+    "output_dir": "/path/to/output/ibdownloads",
+    "ib_client_id": 27
+}

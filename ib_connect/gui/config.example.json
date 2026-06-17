@@ -1,0 +1,10 @@
+{
+    "host": "127.0.0.1",
+    "port": 5000,
+    "contracts_folder": "./data/contracts",
+    "downloads_folder": "./data/downloads",
+    "job_queue_db": "/path/to/jobs.db",
+    "ib_host": "127.0.0.1",
+    "ib_port": 7497,
+    "ib_client_id": 77
+}
