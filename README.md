@@ -25,6 +25,12 @@ ib_connect/
 ## Installation
 
 ```bash
+pip install ib-connect
+```
+
+Or install from source for development:
+
+```bash
 git clone https://github.com/alacazar/ib-connect.git
 cd ib_connect
 pip install -e .
