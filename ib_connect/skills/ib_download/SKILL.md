@@ -6,81 +6,100 @@ location: ib_connect/skills/ib_download/ib_download.py
 
 ## IB Download Skill
 
-Download historical market data from Interactive Brokers asynchronously. Submit a job, and you'll be notified when it's done. Supports single contracts or batch processing via config file.
+Download historical market data from Interactive Brokers asynchronously. Submit a job via CLI, and a background service processes it and saves a CSV or JSON file. Supports single contracts or batch mode via CSV config file.
 
 ### Prerequisites
-- `ib_insync` library installed.
+- `ib_insync` installed.
 - IB Gateway or TWS running and accessible.
-- Python 3.7+.
+- Python 3.9+.
 - Background service running (see below).
+
+### Running the Service
+
+Start `download_service.py` once and keep it running (e.g. in `screen` or `tmux`):
+
+```bash
+python ib_connect/skills/ib_download/download_service.py
+```
+
+The service holds a single IB connection and processes jobs sequentially with pacing delays to comply with IB's rate limits. Configure `db_path`, `output_dir`, and IB connection details in `config.json`.
 
 ### Usage
 
-#### Submit a Download Job
+#### Submit a Job
 ```bash
-python ib_download.py [OPTIONS]
+ib-download -c 265598 -s 2023-01-01 -e 2023-12-31 -b "1 min"
 ```
 
-Creates a background job for downloading data. You'll receive a notification when complete.
+Returns `{"job_key": "<key>"}` immediately.
 
 #### Check Job Status
 ```bash
-python ib_download.py --status --key <job_key>
+ib-download --status -k <job_key>
 ```
 
-Returns the current status (pending, processing, completed, failed) and result details.
+Returns status (`pending`, `processing`, `completed`, `failed`) and result details.
 
 ### Options
 
 #### Required for Submission
-- `-c, --conid` (int): Contract ID (e.g., 265598 for AAPL). Use IB's contract ID for precision.
-- `-s, --start` (str): Start date (YYYY-MM-DD).
-- `-e, --end` (str): End date (YYYY-MM-DD).
-- `-b, --bar-size` (str): Bar size. Allowed: `1sec`, `5secs`, `15secs`, `30secs`, `1min`, `2mins`, `3mins`, `5mins`, `15mins`, `30mins`, `1hour`, `2hours`, `3hours`, `4hours`, `8hours`, `1day`, `1week`, `1month`.
-- `-A, --agent` (str): Agent name/ID for notifications (e.g., "apoc"). Required for notifications.
-- `-m, --msg` (str): Custom message to include in the notification (e.g., "Load the CSV and run backtest on strategy X").
+- `-c, --conid` (int): IB contract ID.
+- `-s, --start` (str): Start date (`YYYY-MM-DD`).
+- `-e, --end` (str): End date (`YYYY-MM-DD`).
+- `-b, --bar-size` (str): Bar size. Must include the space — allowed values:
+  `1 secs`, `5 secs`, `10 secs`, `15 secs`, `30 secs`,
+  `1 min`, `2 mins`, `3 mins`, `4 mins`, `5 mins`, `10 mins`, `15 mins`, `20 mins`, `30 mins`,
+  `1 hour`, `2 hours`, `3 hours`, `4 hours`, `8 hours`,
+  `1 day`, `1W`, `1M`.
 
 #### Optional
-- `--show` (str): Data type. Allowed: `TRADES` (default), `MIDPOINT`, `BID`, `ASK`.
-- `-o, --output-dir` (str): Output directory (default: "./data").
-- `-f, --config-file` (str): Path to batch config file (CSV: `conid,start,end,bar_size,show`). Overrides single options.
-- `-H, --host` (str): IB host (default: "127.0.0.1").
-- `-p, --port` (int): IB port (default: 7497).
-- `-i, --client-id` (int): IB client ID (default: 1).
-- `--timeout` (float): Connection timeout in seconds (default: 4.0).
-- `--max-retries` (int): Max retries per chunk (default: 3).
-- `--use-rth` (bool): Use regular trading hours only (default: False).
-- `-v, --verbose` (bool): Verbose output (default: False).
+- `--show` (str): Data type — `TRADES` (default), `MIDPOINT`, `BID`, `ASK`.
+- `--format` (str): Output format — `csv` (default) or `json`.
+- `-f, --config-file` (str): Path to batch CSV (`conid,start,end,bar_size,show`). Overrides single-contract options.
+- `-A, --agent` (str): Agent name/ID for webhook notification on completion.
+- `-m, --msg` (str): Custom message included in the notification payload.
+- `-H, --host` (str): IB host (default: `127.0.0.1`).
+- `-p, --port` (int): IB port (default: `7497`).
+- `-i, --client-id` (int): IB client ID (default: `99`).
+- `--timeout` (float): Connection timeout in seconds (default: `4.0`).
+- `--max-retries` (int): Max retries per chunk (default: `3`).
+- `--use-rth`: Use regular trading hours only (default: off).
+- `-v, --verbose`: Verbose output.
 
 #### For Status Check
 - `--status`: Enable status mode.
-- `-k, --key` (str): Job key from submission.
+- `-k, --key` (str): Job key from a prior submission.
+
+### Output Files
+
+Files are saved to `output_dir` (configured in `config.json`) with the naming pattern:
+
+```
+<localSymbol>.<conid>.<barsize>.<timezone>.<bar-type>.csv
+```
+
+Example: `AAPL.265598.1min.us-eastern.trades.csv`
 
 ### Behavior
-- **Job Creation**: Submits a job for background processing. Returns a unique `job_key` immediately.
-- **Processing**: Downloads data in chunks (respecting IB limits), saves as CSV in `output_dir` (e.g., `265598_1min.csv`).
-- **Notification**: On completion/failure, notifies the specified agent with details, including any custom message.
-- **Errors**: Check status for issues (e.g., connection failed, no data).
-- **Agent Instructions**: When posting a download job, summarize what should be done when receiving completion notification (e.g., "Load data and analyze trends"). This helps agents remember tasks for asynchronous workflows.
+- **Submission**: Enqueues a job in the SQLite queue (`db_path` in config). Returns `job_key` immediately.
+- **Processing**: Service downloads data in date chunks, sleeping 20s between chunks to respect IB pacing limits.
+- **Notification**: On completion/failure, POSTs to `webhook_url` with job status, result path, and any custom message.
+- **Errors**: Partial data coverage is flagged in the status message.
 
 ### Examples
 ```bash
 # Single contract, 1-min bars
-python ib_download.py -c 265598 -s 2023-01-01 -e 2023-12-31 -b "1 min" -A apoc
+ib-download -c 265598 -s 2023-01-01 -e 2023-12-31 -b "1 min" -A myagent
 
-# Daily bars for speed
-python ib_download.py -c 265598 -s 2020-01-01 -e 2023-12-31 -b "1 day" -A apoc
+# Daily bars
+ib-download -c 265598 -s 2020-01-01 -e 2023-12-31 -b "1 day"
 
 # Batch from file
-python ib_download.py -f contracts.csv -A apoc
+ib-download -f contracts.csv -A myagent
 
 # Check status
-python ib_download.py --status -k abc-123
-```
+ib-download --status -k abc-123
 
-### Running the Service
-Start the background service to process jobs:
-```bash
-python download_service.py
+# JSON output format
+ib-download -c 265598 -s 2023-01-01 -e 2023-12-31 -b "1 day" --format json
 ```
-Run it in the background (e.g., via `screen`, `tmux`, or system service). It polls for jobs and handles downloads.

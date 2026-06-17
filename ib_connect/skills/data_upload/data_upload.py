@@ -100,9 +100,12 @@ def parse_csv_header(filepath, barsize_tables):
         raise ValueError("Not a CSV file")
 
     parts = filename[:-4].split('.')
-    if len(parts) != 4:
+    if len(parts) == 5:
+        symbol, conid_str, barsize_file, tz_str, _ = parts
+    elif len(parts) == 4:
+        symbol, conid_str, barsize_file, tz_str = parts
+    else:
         raise ValueError(f"Invalid filename format: {filename}")
-    symbol, conid_str, barsize_file, tz_str = parts
     try:
         conid = int(conid_str)
     except ValueError:
